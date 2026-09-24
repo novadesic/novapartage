@@ -1,0 +1,103 @@
+<!-- Pager compact (pour le haut du tableau) -->
+<div *ngIf="showPagination && compact" class="pager-compact">
+  <div class="d-flex justify-content-between align-items-center">
+    <!-- Informations de pagination -->
+    <div class="pager-info">
+      <span class="text-muted">{{ paginationInfo }}</span>
+    </div>
+    
+    <!-- Contrôles de navigation compacts -->
+    <div class="pager-nav">
+      <div class="btn-group" role="group">
+        <!-- Première page -->
+        <button type="button" 
+                class="btn btn-outline-secondary btn-sm"
+                (click)="goToPage(1)"
+                [disabled]="currentPage === 1"
+                title="Première page">
+          <i class="bi bi-chevron-double-left"></i>
+        </button>
+        
+        <!-- Page précédente -->
+        <button type="button" 
+                class="btn btn-outline-secondary btn-sm"
+                (click)="prevPage()"
+                [disabled]="currentPage === 1"
+                title="Page précédente">
+          <i class="bi bi-chevron-left"></i>
+        </button>
+        
+        <!-- Page actuelle -->
+        <span class="btn btn-primary btn-sm disabled">
+          {{ currentPage }} / {{ totalPages }}
+        </span>
+        
+        <!-- Page suivante -->
+        <button type="button" 
+                class="btn btn-outline-secondary btn-sm"
+                (click)="nextPage()"
+                [disabled]="currentPage === totalPages"
+                title="Page suivante">
+          <i class="bi bi-chevron-right"></i>
+        </button>
+        
+        <!-- Dernière page -->
+        <button type="button" 
+                class="btn btn-outline-secondary btn-sm"
+                (click)="goToPage(totalPages)"
+                [disabled]="currentPage === totalPages"
+                title="Dernière page">
+          <i class="bi bi-chevron-double-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Pager détaillé (pour le bas du tableau) -->
+<div *ngIf="showPagination && !compact" class="pager-detailed">
+  <div class="d-flex justify-content-between align-items-center">
+    <!-- Informations de pagination -->
+    <div class="pager-info">
+      <span class="text-muted">{{ paginationInfo }}</span>
+    </div>
+    
+    <!-- Contrôles de navigation détaillés -->
+    <div class="pager-nav">
+      <nav aria-label="Navigation de pagination">
+        <ul class="pagination pagination-sm mb-0">
+          <!-- Bouton Précédent -->
+          <li class="page-item" [class.disabled]="currentPage === 1">
+            <button class="page-link" 
+                    (click)="prevPage()" 
+                    [disabled]="currentPage === 1"
+                    title="Page précédente">
+              <i class="bi bi-chevron-left"></i>
+            </button>
+          </li>
+          
+          <!-- Numéros de pages -->
+          <li *ngFor="let page of getPageNumbers()" 
+              class="page-item" 
+              [class.active]="page === currentPage">
+            <button class="page-link" 
+                    (click)="goToPage(page)"
+                    [title]="'Aller à la page ' + page">
+              {{ page }}
+            </button>
+          </li>
+          
+          <!-- Bouton Suivant -->
+          <li class="page-item" [class.disabled]="currentPage === totalPages">
+            <button class="page-link" 
+                    (click)="nextPage()" 
+                    [disabled]="currentPage === totalPages"
+                    title="Page suivante">
+              <i class="bi bi-chevron-right"></i>
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,254 @@
+<div class="form-preview">
+  <!-- Canvas caché pour mesurer le texte -->
+  <canvas #canvas style="position: absolute; left: -9999px; visibility: hidden;"></canvas>
+  
+  <!-- Spinner de chargement -->
+  <div *ngIf="isSimulating" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Chargement...</span>
+    </div>
+    <p class="mt-3 text-muted">Chargement des données...</p>
+  </div>
+  
+  <!-- Prévisualisation du formulaire HTML -->
+  <div class="preview-container" *ngIf="!isSimulating">
+    <div class="preview-header mb-4">
+      <!-- Titre -->
+      <div>
+        <h1 class="preview-title" 
+            *ngIf="pageTitle && pageTitle.trim() !== ''"
+            [class.editable]="allowTitleEdit"
+            (click)="allowTitleEdit ? openEditModal('title') : null">
+          {{ pageTitle }}
+          <i class="bi bi-pencil edit-icon-small" *ngIf="allowTitleEdit"></i>
+        </h1>
+        <div *ngIf="allowTitleEdit && (!pageTitle || pageTitle.trim() === '')" class="empty-field-placeholder">
+          <button class="btn btn-outline-secondary btn-sm" (click)="openEditModal('title')">
+            <i class="bi bi-plus-circle me-1"></i>
+            Ajouter un titre
+          </button>
+        </div>
+      </div>
+      
+      <!-- Espacement conditionnel -->
+      <br *ngIf="(pageTitle && pageTitle.trim() !== '') && (pageDescription && pageDescription.trim() !== '')">
+      
+      <!-- Description -->
+      <div>
+        <div class="preview-description" 
+           *ngIf="pageDescription && pageDescription.trim() !== ''"
+           [class.editable]="allowTitleEdit"
+           (click)="allowTitleEdit ? openEditModal('description') : null">
+          <div [innerHTML]="pageDescription"></div>
+          <i class="bi bi-pencil edit-icon-small" *ngIf="allowTitleEdit"></i>
+        </div>
+        <div *ngIf="allowTitleEdit && (!pageDescription || pageDescription.trim() === '')" class="empty-field-placeholder">
+          <button class="btn btn-outline-secondary btn-sm" (click)="openEditModal('description')">
+            <i class="bi bi-plus-circle me-1"></i>
+            Ajouter une description
+          </button>
+        </div>
+      </div>
+     
+    </div>
+
+    <div class="preview-content">
+      <form>
+
+          <!-- Pager au-dessus du tableau -->
+          <app-pager 
+            [currentPage]="currentPage"
+            [totalPages]="totalPages"
+            [showPagination]="showPagination"
+            [paginationInfo]="getPaginationInfo()"
+            [compact]="true"
+            (pageChange)="onPageChange($event)">
+          </app-pager>
+        <!-- Conteneur responsive pour le tableau -->
+        <div class="table-responsive-container" 
+             #tableContainer
+             [ngClass]="{'zoom-active': isZoomEnabled && tableScale < 1}"
+             [ngStyle]="getContainerStyles()">
+          
+
+          <!-- Indicateur de zoom et bouton de basculement -->
+          <div *ngIf="isTableWide" class="zoom-controls">
+            <div class="zoom-indicator" *ngIf="isZoomEnabled">
+              <small class="text-muted">
+                <i class="bi bi-zoom-in me-1"></i>
+                Tableau adapté à l'écran ({{ (tableScale * 100) | number:'1.0-1' }}%)
+                <button class="btn btn-sm zoom-toggle-btn"
+                      [ngClass]="getZoomButtonClass()"
+                      (click)="toggleZoom()"
+                      [title]="getZoomButtonText()">
+                
+                {{ isZoomEnabled ? 'Désactiver' : 'Activer' }}
+              </button>
+              </small>
+            </div>
+            <div class="d-flex gap-2" *ngIf="!isZoomEnabled">
+              <button class="btn btn-sm zoom-toggle-btn"
+                      [ngClass]="getZoomButtonClass()"
+                      (click)="toggleZoom()"
+                      [title]="getZoomButtonText()">
+                <i [class]="getZoomButtonIcon()"></i>
+                {{ isZoomEnabled ? 'Désactiver' : 'Adapter le tableau à l\'écran' }}
+              </button>
+            
+            </div>
+          </div>
+          
+          <div class="table-wrapper" 
+               [ngStyle]="getTableStyles()"
+               [class.zoomed]="isZoomEnabled && tableScale < 1">
+            <table class="table table-bordered" #table (click)="onTableClick($event)">
+              <thead>
+                <tr>
+                  <th *ngFor="let column of selectedColumns" style="text-align: center; background: #f8f9fa;">
+                    {{ columnHeadersMap[column] || getColumnLabel(column) }}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let row of selectedData; let rowIndex = index">
+                  <td *ngFor="let column of selectedColumns; let colIndex = index" 
+                      class="table-sheet-cell"
+                      [class.editable-cell]="shouldShowEditableInput(rowIndex, column)"
+                      [class.editable-cell-clickable]="shouldShowEditableInput(rowIndex, column) && editingCellKey !== getCellKey(rowIndex, colIndex) && !isPreviewMode && !readOnly"
+                      (click)="shouldShowEditableInput(rowIndex, column) && editingCellKey !== getCellKey(rowIndex, colIndex) && !isPreviewMode && !readOnly ? startEditingCell(rowIndex, colIndex, $event) : null"
+                      [title]="shouldShowEditableInput(rowIndex, column) && editingCellKey !== getCellKey(rowIndex, colIndex) && !isPreviewMode && !readOnly ? (isCellModified(rowIndex, column) ? 'Cliquer pour éditer - Modifié' : 'Cliquer pour éditer') : ''">
+                    <!-- Cellule éditable ou affichée comme input en mode prévisualisation -->
+                    <div *ngIf="shouldShowEditableInput(rowIndex, column); else readonlyCell" class="position-relative cell-content-wrapper">
+                      <!-- Mode affichage : contenu avec icônes d'édition et réinitialisation -->
+                      <div *ngIf="editingCellKey !== getCellKey(rowIndex, colIndex); else editingCellTemplate"
+                           class="editable-cell-content"
+                           [class.cell-modified]="isCellModified(rowIndex, column)">
+                        <span class="cell-content-text">{{ getCellValue(rowIndex, colIndex) || 'Cliquer pour saisir...' }}</span>
+                        <div class="cell-action-icons" *ngIf="!isPreviewMode">
+                          <button *ngIf="isCellModified(rowIndex, column) && !readOnly"
+                                  type="button"
+                                  class="btn btn-link btn-sm cell-reset-icon-btn"
+                                  (click)="resetToOriginal(rowIndex, colIndex); $event.stopPropagation()"
+                                  title="Revenir à la valeur d'origine">
+                            <i class="bi bi-arrow-counterclockwise"></i>
+                          </button>
+                          <i class="bi bi-pencil-square cell-edit-icon" 
+                             [title]="isCellModified(rowIndex, column) ? (readOnly ? 'Cellule modifiée (lecture seule)' : 'Cliquer pour éditer - Modifié') : (readOnly ? 'Cellule éditable (lecture seule)' : 'Cliquer pour éditer')"></i>
+                        </div>
+                      </div>
+                      <!-- Mode édition : textarea inline -->
+                      <ng-template #editingCellTemplate>
+                        <div class="cell-editing-container">
+                          <textarea 
+                            class="form-control cell-edit-input" 
+                            [value]="editingCellValue" 
+                            placeholder="ex: valeur à saisir (Entrée pour nouvelle ligne, Ctrl+Entrée pour sauvegarder)"
+                            rows="1"
+                            (blur)="onCellBlur($event)"
+                            (keydown)="onCellEditKeydown($event, rowIndex, colIndex)"
+                            (input)="onCellEditInput($event)"
+                            (click)="$event.stopPropagation()"
+                            title="Entrée : nouvelle ligne | Ctrl+Entrée : sauvegarder | Échap : annuler"
+                            #cellEditInput></textarea>
+                        </div>
+                      </ng-template>
+                    </div>
+                    <!-- Boutons d'action à droite de la cellule (en dehors du contenu) -->
+                    <div *ngIf="shouldShowEditableInput(rowIndex, column) && editingCellKey === getCellKey(rowIndex, colIndex) && !isPreviewMode && !readOnly"
+                         class="cell-action-buttons">
+                         <button type="button"
+                         class="btn btn-outline-secondary btn-sm cell-nav-btn cell-prev-btn"
+                         (mousedown)="preventBlur($event)"
+                         (click)="navigateToPreviousCell(); $event.stopPropagation()"
+                         title="Cellule précédente (Shift+Tab)">
+                   <i class="bi bi-arrow-left"></i>
+                 </button>
+                 <button type="button"
+                         class="btn btn-outline-secondary btn-sm cell-nav-btn cell-next-btn"
+                         (mousedown)="preventBlur($event)"
+                         (click)="navigateToNextCell(); $event.stopPropagation()"
+                         title="Cellule suivante (Tab)">
+                   <i class="bi bi-arrow-right"></i>
+                 </button>
+                      <button type="button"
+                              class="btn btn-outline-danger btn-sm cell-cancel-btn"
+                              (click)="stopEditingCell(false, true); $event.stopPropagation()"
+                              title="Annuler la saisie (Échap)">
+                        <i class="bi bi-x-lg"></i>
+                      </button>
+                      <button type="button"
+                              class="btn btn-outline-success btn-sm cell-validate-btn"
+                              (click)="stopEditingCell(true, true); $event.stopPropagation()"
+                              title="Valider la saisie (Ctrl+Entrée)">
+                        <i class="bi bi-check-lg"></i>
+                      </button>
+                     
+                    </div>
+                    <ng-template #readonlyCell>
+                      <!-- Cellule non éditable - affichage normal -->
+                      {{ row[column] || '' }}
+                    </ng-template>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Contrôles de pagination -->
+        <app-pager 
+          [currentPage]="currentPage"
+          [totalPages]="totalPages"
+          [showPagination]="showPagination"
+          [paginationInfo]="getPaginationInfo()"
+          [compact]="true"
+          (pageChange)="onPageChange($event)">
+        </app-pager>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal d'édition -->
+  <div class="modal fade" [class.show]="showEditModal" [style.display]="showEditModal ? 'block' : 'none'" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            {{ editingField === 'title' ? 'Donnez un titre au partage pour' : 'Ecrivez la description du partage pour' }}
+            <small class="text-muted ms-2" *ngIf="recipientEmail"> {{ recipientEmail }}</small>
+          </h5>
+          <button type="button" class="btn-close" (click)="cancelEdit()"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3" *ngIf="editingField === 'title'">
+            <label class="form-label">Titre</label>
+            <input #titleInput type="text" class="form-control" [(ngModel)]="tempTitle">
+          </div>
+          <div class="mb-3" *ngIf="editingField === 'description'">
+            <label class="form-label">Description</label>
+            <app-simple-html-editor 
+              [value]="tempDescription" 
+              [forceUpdate]="forceEditorUpdate"
+              (valueChange)="tempDescription = $event">
+            </app-simple-html-editor>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="cancelEdit()">Annuler</button>
+          <button type="button" class="btn btn-primary" (click)="saveChanges()"><i class="bi bi-person-fill me-1"></i>Appliquer à ce destinataire</button>
+          <button type="button" class="btn btn-info" (click)="saveChangesAndNext()" *ngIf="totalRecipients > 1">
+            <i class="bi bi-arrow-right-circle-fill me-1"></i>
+            Appliquer et passer au destinataire suivant
+          </button>
+          <button type="button" class="btn btn-success" (click)="saveChangesToAll()" *ngIf="totalRecipients > 1">
+            <i class="bi bi-people-fill me-1"></i>
+            Appliquer à tous les destinataires
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Backdrop -->
+  <div class="modal-backdrop fade show" *ngIf="showEditModal"></div>
+</div> 

@@ -1,0 +1,278 @@
+services:
+  # Service d'authentification personnalisé
+  auth-service:
+    image: node:18-alpine
+    container_name: novapartage-auth
+    working_dir: /app
+    command: sh -c "npm install && npm start"
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./auth-service:/app
+    depends_on:
+      - email-service
+      - redis
+      - postgres
+    environment:
+      # Configuration de base
+      - NODE_ENV=${NODE_ENV:-development}
+      - PORT=${AUTH_PORT:-3001}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      
+      # Configuration JWT
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-1h}
+      - JWT_REFRESH_EXPIRES_IN=${JWT_REFRESH_EXPIRES_IN:-7d}
+      - JWT_ALGORITHM=${JWT_ALGORITHM:-HS256}
+      - JWT_ISSUER=${JWT_ISSUER:-novapartage-auth}
+      - JWT_AUDIENCE=${JWT_AUDIENCE:-novapartage-frontend}
+      
+      # Configuration de Session
+      - MAX_SESSION_DURATION=${MAX_SESSION_DURATION:-36000}
+      - MAX_REFRESH_COUNT=${MAX_REFRESH_COUNT:-20}
+      - MAX_IDLE_TIME=${MAX_IDLE_TIME:-1800}
+      
+      # Configuration Redis
+      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - REDIS_DB=${REDIS_DB:-0}
+      - REDIS_ENABLED=${REDIS_ENABLED:-true}
+      
+      # Configuration CSRF
+      - CSRF_SECRET=${CSRF_SECRET:-your-csrf-secret-key}
+      
+      # Configuration Sécurité
+      - SECURITY_HEADERS_ENABLED=${SECURITY_HEADERS_ENABLED:-true}
+      - RATE_LIMIT_ENABLED=${RATE_LIMIT_ENABLED:-true}
+      - CSP_ENABLED=${CSP_ENABLED:-true}
+      - HSTS_ENABLED=${HSTS_ENABLED:-false}
+      
+      # Configuration CORS
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:3000,http://localhost}
+      
+      # Configuration URLs
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost}
+      - AUTH_CALLBACK_URL=${AUTH_CALLBACK_URL:-http://localhost/auth/callback}
+      
+      # Configuration Email Service (utilise le microservice email-service)
+      - EMAIL_SERVICE_URL=${EMAIL_SERVICE_URL:-http://email-service:3002}
+      - EMAIL_SERVICE_TIMEOUT=${EMAIL_SERVICE_TIMEOUT:-10000}
+      - SMTP_FROM=${SMTP_FROM:-no-reply@novapartage.fr}
+      - EMAIL_SUBJECT=${EMAIL_SUBJECT:-Lien de connexion NovaPartage}
+      
+      # Configuration Rate Limiting
+      - RATE_LIMIT_WINDOW_MS=${RATE_LIMIT_WINDOW_MS:-900000}
+      - RATE_LIMIT_MAX_REQUESTS=${RATE_LIMIT_MAX_REQUESTS:-5}
+      - AUTH_RATE_LIMIT_WINDOW_MS=${AUTH_RATE_LIMIT_WINDOW_MS:-900000}
+      - AUTH_RATE_LIMIT_MAX_REQUESTS=${AUTH_RATE_LIMIT_MAX_REQUESTS:-5}
+      - TOKEN_RATE_LIMIT_WINDOW_MS=${TOKEN_RATE_LIMIT_WINDOW_MS:-900000}
+      - TOKEN_RATE_LIMIT_MAX_REQUESTS=${TOKEN_RATE_LIMIT_MAX_REQUESTS:-300}
+      - EMAIL_RATE_LIMIT_WINDOW_MS=${EMAIL_RATE_LIMIT_WINDOW_MS:-3600000}
+      - EMAIL_RATE_LIMIT_MAX_REQUESTS=${EMAIL_RATE_LIMIT_MAX_REQUESTS:-10}
+      
+      # Configuration Cookies
+      - COOKIE_SECURE=${COOKIE_SECURE:-false}
+      - COOKIE_SAME_SITE=${COOKIE_SAME_SITE:-lax}
+      - COOKIE_DOMAIN=${COOKIE_DOMAIN:-localhost}
+      - COOKIE_HTTP_ONLY=${COOKIE_HTTP_ONLY:-true}
+      - COOKIE_MAX_AGE=${COOKIE_MAX_AGE:-3600000}
+      
+      # Configuration Stockage
+      - TOKEN_STORAGE_METHOD=${TOKEN_STORAGE_METHOD:-cookies}
+      - JWT_VALIDATION_MODE=${JWT_VALIDATION_MODE:-server}
+      
+      # Configuration PostgreSQL (mots de passe utilisateur)
+      - DB_HOST=${DB_HOST:-postgres}
+      - DB_PORT=${DB_PORT:-5432}
+      - DB_NAME=${DB_NAME:-novapartage}
+      - DB_USERNAME=${DB_USERNAME:-novapartage}
+      - DB_PASSWORD=${DB_PASSWORD:-novapartage_password}
+    networks:
+      - novapartage-network
+    restart: unless-stopped
+
+  # Monitoring-service (service de monitoring et génération de rapports)
+  monitoring-service:
+    image: node:18-alpine
+    container_name: novapartage-monitoring
+    working_dir: /app
+    command: sh -c "npm install && npm start"
+    volumes:
+      - ./monitoring-service:/app
+      # Volume des fichiers temporaires (lecture/écriture pour la maintenance)
+      # Si le répertoire user_files existe
+      - ./user_files:/app/files:rw
+    environment:
+      # PostgreSQL (remplace MongoDB)
+      - DB_HOST=${DB_HOST:-postgres}
+      - DB_PORT=${DB_PORT:-5432}
+      - DB_NAME=${DB_NAME:-novapartage}
+      - DB_USERNAME=${DB_USERNAME:-novapartage}
+      - DB_PASSWORD=${DB_PASSWORD:-novapartage_password}
+      
+      # Planification (cron format: minute heure jour mois jour-semaine)
+      # Exemple: "0 8 * * *" = tous les jours à 8h00
+      - MONITORING_SCHEDULE=${MONITORING_SCHEDULE:-0 8 * * *}
+      - MONITORING_ENABLED=${MONITORING_ENABLED:-true}
+      
+      # Maintenance (nettoyage des fichiers temporaires)
+      # Planification par défaut: toutes les heures
+      - MAINTENANCE_SCHEDULE=${MAINTENANCE_SCHEDULE:-0 * * * *}
+      - MAINTENANCE_ENABLED=${MAINTENANCE_ENABLED:-true}
+      - MAINTENANCE_MAX_AGE_HOURS=${MAINTENANCE_MAX_AGE_HOURS:-1}
+      - MAINTENANCE_RUN_ON_START=${MAINTENANCE_RUN_ON_START:-false}
+      
+      # Email
+      - SMTP_HOST=${SMTP_HOST:-mailhog}
+      - SMTP_PORT=${SMTP_PORT:-1025}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASS=${SMTP_PASS:-}
+      - SMTP_FROM=${SMTP_FROM:-monitoring@novapartage.com}
+      - SMTP_SECURE=${SMTP_SECURE:-false}
+      - SMTP_IGNORE_TLS=${SMTP_IGNORE_TLS:-true}
+      - SMTP_REQUIRE_TLS=${SMTP_REQUIRE_TLS:-false}
+      - SMTP_TLS_REJECT_UNAUTHORIZED=${SMTP_TLS_REJECT_UNAUTHORIZED:-false}
+      - MONITORING_EMAIL_TO=${MONITORING_EMAIL_TO:-admin@example.com}
+      
+      # Fichiers temporaires (volume monté si disponible)
+      - TEMP_FILES_DIR=/app/files/temp
+    depends_on:
+      - postgres
+      - mailhog
+    networks:
+      - novapartage-network
+    restart: unless-stopped
+
+  # Email-service (service d'envoi d'emails avec support multi-relais)
+  # Accessible uniquement en interne via le réseau Docker (email-service:3002)
+  email-service:
+    image: node:18-alpine
+    container_name: novapartage-email
+    working_dir: /app
+    command: sh -c "npm install && npm start"
+    volumes:
+      - ./email-service:/app
+    environment:
+      # Configuration serveur
+      - NODE_ENV=${NODE_ENV:-development}
+      - PORT=${EMAIL_PORT:-3002}
+      - HOST=${EMAIL_HOST:-0.0.0.0}
+      
+      # Relais SMTP (développement avec MailHog)
+      - SMTP_ENABLED=${SMTP_ENABLED:-true}
+      - SMTP_NAME=${SMTP_NAME:-smtp-default}
+      - SMTP_PRIORITY=${SMTP_PRIORITY:-10}
+      - SMTP_HOST=${SMTP_HOST:-mailhog}
+      - SMTP_PORT=${SMTP_PORT:-1025}
+      - SMTP_SECURE=${SMTP_SECURE:-false}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASS=${SMTP_PASS:-}
+      - SMTP_FROM=${SMTP_FROM:-no-reply@novapartage.fr}
+      - SMTP_IGNORE_TLS=${SMTP_IGNORE_TLS:-true}
+      - SMTP_REQUIRE_TLS=${SMTP_REQUIRE_TLS:-false}
+      - SMTP_TLS_REJECT_UNAUTHORIZED=${SMTP_TLS_REJECT_UNAUTHORIZED:-false}
+      
+      # Relais Mailjet (optionnel, désactivé par défaut en dev)
+      - MAILJET_ENABLED=${MAILJET_ENABLED:-false}
+      - MAILJET_NAME=${MAILJET_NAME:-mailjet-default}
+      - MAILJET_PRIORITY=${MAILJET_PRIORITY:-5}
+      - MAILJET_API_KEY=${MAILJET_API_KEY:-}
+      - MAILJET_API_SECRET=${MAILJET_API_SECRET:-}
+      - MAILJET_FROM_EMAIL=${MAILJET_FROM_EMAIL:-no-reply@novapartage.fr}
+      - MAILJET_FROM_NAME=${MAILJET_FROM_NAME:-NovaPartage}
+    ports:
+      - "3002:3002"
+    depends_on:
+      - mailhog
+    networks:
+      - novapartage-network
+    restart: unless-stopped
+
+  # Redis pour le stockage des tokens et sessions
+  redis:
+    image: redis:7-alpine
+    container_name: novapartage-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - novapartage-network
+    restart: unless-stopped
+
+  # Mailpit pour simuler l'envoi d'emails en local (alternative moderne à MailHog)
+  # Mailpit gère mieux les images embarquées et le décodage quoted-printable
+  mailhog:
+    image: axllent/mailpit:latest
+    container_name: novapartage-webmail
+    ports:
+      - "1025:1025"  # SMTP server
+      - "8025:8025"  # Web UI
+    networks:
+      - novapartage-network
+    restart: unless-stopped
+
+  # Base de données PostgreSQL (pour authentification ET partages)
+  postgres:
+    image: postgres:15
+    container_name: novapartage-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-novapartage}
+      POSTGRES_USER: ${POSTGRES_USER:-novapartage}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-novapartage_password}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - novapartage-network
+    restart: unless-stopped
+
+  # MongoDB commenté (remplacé par PostgreSQL)
+  # mongodb:
+  #   image: mongo:7.0
+  #   container_name: novapartage-mongodb
+  #   environment:
+  #     MONGO_INITDB_ROOT_USERNAME: admin
+  #     MONGO_INITDB_ROOT_PASSWORD: admin123
+  #     MONGO_INITDB_DATABASE: novapartage
+  #   ports:
+  #     - "27017:27017"
+  #   volumes:
+  #     - mongodb_data:/data/db
+  #     - ./mongodb/init:/docker-entrypoint-initdb.d:ro
+  #   networks:
+  #     - novapartage-network
+  #   restart: unless-stopped
+
+  # Nginx Reverse Proxy
+  # Peut démarrer indépendamment grâce à la résolution DNS dynamique
+  nginx:
+    image: nginx:alpine
+    container_name: novapartage-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/frontend-fallback.html:/etc/nginx/frontend-fallback.html:ro
+      - ./nginx/logo.png:/etc/nginx/logo.png:ro
+      - ./nginx/background.jpg:/etc/nginx/background.jpg:ro
+    # depends_on retiré : nginx peut démarrer même si les services ne sont pas prêts
+    # grâce à la résolution DNS dynamique dans nginx.conf
+    networks:
+      - novapartage-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+
+volumes:
+  postgres_data:
+  # mongodb_data:  # Commenté - migration vers PostgreSQL
+  redis_data:
+
+networks:
+  novapartage-network:
+    driver: bridge 

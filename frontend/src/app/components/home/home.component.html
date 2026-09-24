@@ -1,0 +1,156 @@
+<div class=" d-flex flex-column">
+  <!-- Navbar globale fixe -->
+  <app-navbar pageTitle="Accueil"></app-navbar>
+
+  <!-- Bandeau proposition de définir un mot de passe (utilisateur sans mot de passe) -->
+  <div *ngIf="showSetPasswordBanner" class="alert alert-info mx-3 mt-2 mb-0 d-flex align-items-center justify-content-between flex-wrap gap-2">
+    <span>
+      <i class="bi bi-key me-2"></i>
+      <strong>Connexion plus rapide</strong> : Définissez un mot de passe pour vous connecter sans recevoir de code par email.
+    </span>
+    <div class="d-flex gap-2">
+      <button type="button" class="btn btn-sm btn-primary" (click)="openSetPasswordModal()">
+        <i class="bi bi-key me-1"></i>Définir un mot de passe
+      </button>
+      <button type="button" class="btn btn-sm btn-outline-secondary" (click)="dismissSetPasswordBanner()">
+        Plus tard
+      </button>
+    </div>
+  </div>
+
+  <!-- Contenu principal -->
+  <main class="flex-grow-1">
+    <!-- Intégrer le composant de liste des partages -->
+    <app-shares-list></app-shares-list>
+  </main>
+
+  <!-- Pied de page -->
+  <app-footer></app-footer>
+</div>
+
+<!-- Modal définir un mot de passe (flux en 2 étapes sans rechargement) -->
+<div class="modal fade show" [style.display]="showSetPasswordModal ? 'block' : 'none'" [style.background]="'rgba(0,0,0,0.4)'" style="z-index: 1050; position: fixed; top: 0; left: 0; width: 100%; height: 100%;">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-key me-2"></i>
+          Définir un mot de passe
+        </h5>
+        <button type="button" class="btn-close" (click)="closeSetPasswordModal()"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Étape 1 : Saisie du mot de passe + envoi du code -->
+        <div *ngIf="!setPasswordCodeSent">
+          <p class="text-muted mb-3">
+            Définissez un mot de passe pour vous connecter plus rapidement sans recevoir de code par email.
+            Un code de confirmation vous sera envoyé par email.
+          </p>
+          <div class="alert alert-light border mb-3 small">
+            <i class="bi bi-info-circle me-2"></i>{{ passwordRulesMessage }}
+          </div>
+          <form (ngSubmit)="submitSetPasswordRequest()">
+            <div class="mb-3">
+              <label for="newPassword" class="form-label">Nouveau mot de passe</label>
+              <div class="input-group">
+                <input 
+                  [type]="showNewPassword ? 'text' : 'password'" 
+                  class="form-control" 
+                  id="newPassword" 
+                  [(ngModel)]="newPassword" 
+                  name="newPassword"
+                  placeholder="Ex: MonMotDePasse1!"
+                  minlength="8"
+                  [disabled]="isSendingSetPasswordCode">
+                <button class="btn btn-outline-secondary" type="button" (click)="showNewPassword = !showNewPassword" [disabled]="isSendingSetPasswordCode" tabindex="-1">
+                  <i class="bi" [ngClass]="showNewPassword ? 'bi-eye-slash' : 'bi-eye'"></i>
+                </button>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="confirmPassword" class="form-label">Confirmer le mot de passe</label>
+              <div class="input-group">
+                <input 
+                  [type]="showConfirmPassword ? 'text' : 'password'" 
+                  class="form-control" 
+                  id="confirmPassword" 
+                  [(ngModel)]="confirmPassword" 
+                  name="confirmPassword"
+                  placeholder="Répétez le mot de passe"
+                  [disabled]="isSendingSetPasswordCode">
+                <button class="btn btn-outline-secondary" type="button" (click)="showConfirmPassword = !showConfirmPassword" [disabled]="isSendingSetPasswordCode" tabindex="-1">
+                  <i class="bi" [ngClass]="showConfirmPassword ? 'bi-eye-slash' : 'bi-eye'"></i>
+                </button>
+              </div>
+            </div>
+            <div class="alert alert-danger" *ngIf="setPasswordError">
+              <i class="bi bi-exclamation-triangle me-2"></i>{{ setPasswordError }}
+            </div>
+            <div class="d-grid gap-2">
+              <button 
+                type="submit" 
+                class="btn btn-primary"
+                [disabled]="isSendingSetPasswordCode || !newPassword || !confirmPassword">
+                <span *ngIf="isSendingSetPasswordCode" class="spinner-border spinner-border-sm me-2"></span>
+                Envoyer le code par email
+              </button>
+              <button 
+                type="button" 
+                class="btn btn-outline-secondary"
+                (click)="closeSetPasswordModal()"
+                [disabled]="isSendingSetPasswordCode">
+                Annuler
+              </button>
+            </div>
+          </form>
+        </div>
+        <!-- Étape 2 : Saisie du code reçu par email (sans rechargement) -->
+        <div *ngIf="setPasswordCodeSent" class="text-center">
+          <div class="alert alert-success">
+            <i class="bi bi-check-circle me-2"></i>
+            <strong>Code envoyé !</strong>
+          </div>
+          <p class="text-muted mb-3">
+            Un code de confirmation a été envoyé à votre adresse email.
+            Saisissez-le ci-dessous pour valider votre mot de passe.
+          </p>
+          <form (ngSubmit)="submitSetPasswordConfirm()">
+            <div class="mb-3">
+              <label for="setPasswordCode" class="form-label">Code de confirmation</label>
+              <input 
+                type="text" 
+                class="form-control text-center" 
+                id="setPasswordCode" 
+                [(ngModel)]="setPasswordCode" 
+                name="setPasswordCode"
+                placeholder="ex: 123456"
+                maxlength="6"
+                [disabled]="isConfirmingSetPasswordCode"
+                (input)="onSetPasswordCodeInput($event)"
+                style="font-size: 1.5rem; letter-spacing: 0.5rem;">
+            </div>
+            <div class="alert alert-danger" *ngIf="setPasswordError">
+              <i class="bi bi-exclamation-triangle me-2"></i>{{ setPasswordError }}
+            </div>
+            <div class="d-grid gap-2">
+              <button 
+                type="submit" 
+                class="btn btn-success"
+                [disabled]="isConfirmingSetPasswordCode || !setPasswordCode || setPasswordCode.length !== 6">
+                <span *ngIf="isConfirmingSetPasswordCode" class="spinner-border spinner-border-sm me-2"></span>
+                Valider et enregistrer
+              </button>
+              <button 
+                type="button" 
+                class="btn btn-outline-secondary"
+                (click)="backToSetPasswordStep1()"
+                [disabled]="isConfirmingSetPasswordCode">
+                <i class="bi bi-arrow-left me-2"></i>Modifier le mot de passe
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,55 @@
+<!-- Disposition verticale (par défaut) -->
+<div *ngIf="layout === 'vertical'" class="dest-list-vertical d-flex flex-column h-100" style="min-width:220px; overflow: hidden;">
+  <div class="flex-grow-1" style="overflow-y: auto;">
+    <div class="nav flex-column nav-pills">
+      <div *ngFor="let dest of sortedDestinataires; let i = index"
+           class="nav-link d-flex align-items-start mb-1"
+           [class.active]="destinataires.indexOf(dest) === activeIndex"
+           [class.bg-primary]="destinataires.indexOf(dest) === activeIndex"
+           [class.text-white]="destinataires.indexOf(dest) === activeIndex"
+           [class.dest-inactive]="destinataires.indexOf(dest) !== activeIndex"
+           (click)="setActive(destinataires.indexOf(dest))"
+           style="cursor:pointer; border-radius:6px;margin-left: 0px; padding: 0.5rem 0.75rem;">
+        <span class="dest-name-text-vertical flex-grow-1" style="min-width: 0; word-break: break-word; line-height: 1.3;">{{ dest.displayName || dest.email }}</span>
+        <button type="button" class="btn btn-link p-0 ms-2 flex-shrink-0 dest-delete-btn" style="margin-top: 0.125rem; border: none; background: none;" aria-label="Supprimer" (click)="removeDestinataire(destinataires.indexOf(dest)); $event.stopPropagation()">
+          <i class="bi bi-trash" [class.text-white]="destinataires.indexOf(dest) === activeIndex"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="mt-3 d-flex align-items-center flex-shrink-0" style="border-top:1px solid #eee; padding-top:10px;">
+    <button type="button" class="btn btn-sm btn-primary w-100" (click)="openContactsModalHandler()">
+      <i class="bi bi-person-plus me-1"></i>
+      Ajouter
+    </button>
+  </div>
+</div>
+
+<!-- Disposition horizontale (onglets) -->
+<div *ngIf="layout === 'horizontal'" class="dest-list-horizontal w-100 mb-3">
+  <div class="d-flex align-items-start justify-content-between mb-2">
+    <div class="d-flex align-items-center flex-grow-1" style="min-width: 0; overflow: visible;">
+     
+      <div class="nav nav-tabs flex-grow-1" style="border-bottom: none; overflow-x: auto; flex-wrap: nowrap; min-width: 0;">
+        <div *ngFor="let dest of sortedDestinataires; let i = index"
+             class="nav-link d-flex align-items-start me-1 flex-shrink-0"
+             [class.active]="destinataires.indexOf(dest) === activeIndex"
+             [class.bg-primary]="destinataires.indexOf(dest) === activeIndex"
+             [class.text-white]="destinataires.indexOf(dest) === activeIndex"
+             [class.border-1]="destinataires.indexOf(dest) === activeIndex"
+             [class.dest-inactive]="destinataires.indexOf(dest) !== activeIndex"
+             (click)="setActive(destinataires.indexOf(dest))"
+             style="cursor:pointer; border-radius:6px 6px 0 0; margin-bottom: -1px; min-width: 120px; max-width: 250px; overflow: hidden;">
+          <span class="dest-name-text flex-grow-1" style="min-width: 0; word-break: break-word; line-height: 1.3;">{{ dest.displayName || dest.email }}</span>
+          <button type="button" class="btn btn-link p-0 ms-2 flex-shrink-0 dest-delete-btn" style="border: none; background: none;" aria-label="Supprimer" (click)="removeDestinataire(destinataires.indexOf(dest)); $event.stopPropagation()">
+            <i class="bi bi-trash" [class.text-white]="destinataires.indexOf(dest) === activeIndex"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    <button type="button" class="btn btn-sm btn-outline-primary ms-2 flex-shrink-0" (click)="openContactsModalHandler()">
+      <i class="bi bi-person-plus me-1"></i>
+      Ajouter
+    </button>
+  </div>
+</div>

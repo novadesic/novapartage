@@ -1,0 +1,23 @@
+NovaPartage
+Partagez des données, pas vos fichiers.
+
+Gérer vos partages
+
+---
+
+Bonjour,
+
+Vous avez demandé à accéder à vos partages sur NovaPartage.
+
+Lien de connexion pour gérer vos partages :
+{{loginLink}}
+
+Cliquez sur le lien ci-dessus pour accéder à vos partages.
+
+⏱️ Ce lien est valide jusqu'au {{expiresAtFormatted}}.
+
+---
+Cet email a été envoyé automatiquement par NovaPartage
+Si vous n'avez pas demandé cet email, vous pouvez l'ignorer.
+
+https://novapartage.fr

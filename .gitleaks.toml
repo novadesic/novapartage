@@ -1,0 +1,36 @@
+# Gitleaks configuration — NovaPartage
+# https://github.com/gitleaks/gitleaks
+
+title = "NovaPartage gitleaks"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Allowlisted paths and patterns"
+paths = [
+  '''^env\.example$''',
+  '''^docs/oss-migration/''',
+  '''^docs/legal/''',
+  '''^docs/oss-migration/test-reports/''',
+  '''^THIRD-PARTY-LICENSES\.md$''',
+  '''^\.gitleaks\.toml$''',
+  '''^backend/ddshare-backend-.*-runner$''',
+  '''^\.env\.backup''',
+  '''^backend/test-tokens\.md$''',
+  '''^backend/test_validated_tokens\.sh$''',
+  '''^backend/doc/''',
+  '''^frontend/doc/''',
+  '''^scripts/security-test\.sh$''',
+]
+regexes = [
+  '''change-me-generate-with-openssl''',
+  '''your-super-secret-jwt-key-change-in-production''',
+  '''your-csrf-secret-key''',
+  '''novapartage_password''',
+  '''grep.*gitlab\.datadesic\.com''',
+  '''YOUR_TOKEN_HERE''',
+  '''YOUR_TOKEN''',
+  '''invalid-token''',
+  '''TOKEN_ID_HERE''',
+]

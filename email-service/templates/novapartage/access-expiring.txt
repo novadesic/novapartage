@@ -1,0 +1,29 @@
+NovaPartage
+Partagez des données, pas vos fichiers.
+
+Expiration prochaine
+
+---
+
+Bonjour,
+
+Votre accès au partage de données {{formName}} va bientôt expirer.
+
+Expiration prochaine
+====================
+Nom du partage: {{formName}}
+Partagé par: {{ownerEmail}}
+Expire le: {{expiresAtFormatted}}
+
+Accéder au partage maintenant :
+{{accessUrl}}
+
+⚠️ Important: Après l'expiration, vous ne pourrez plus accéder à ce partage. Assurez-vous de récupérer toutes les informations nécessaires avant cette date.
+
+Si vous avez des questions, vous pouvez contacter directement {{ownerEmail}}.
+
+---
+Cet email a été envoyé automatiquement par NovaPartage
+Si vous n'avez pas demandé cet email, vous pouvez l'ignorer.
+
+https://novapartage.fr

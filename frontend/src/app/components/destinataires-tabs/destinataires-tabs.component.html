@@ -1,0 +1,16 @@
+<div class="dest-tabs">
+  <ul class="nav nav-tabs mb-2">
+    <li class="nav-item" *ngFor="let dest of destinataires; let i = index">
+      <a class="nav-link" [class.active]="i === activeIndex" (click)="setActive(i)">
+        {{ dest.email }}
+        <button type="button" class="btn-close ms-2" aria-label="Supprimer" (click)="removeDestinataire(i); $event.stopPropagation()"></button>
+      </a>
+    </li>
+    <li class="nav-item">
+      <form (submit)="$event.preventDefault(); addDestinataire(emailInput)">
+        <input #emailInput type="email" class="form-control form-control-sm d-inline-block" style="width: 180px;" placeholder="ex: email@exemple.com">
+        <button type="submit" class="btn btn-sm btn-success ms-1">+</button>
+      </form>
+    </li>
+  </ul>
+</div>

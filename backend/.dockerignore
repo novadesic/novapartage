@@ -1,0 +1,8 @@
+target/
+!target/quarkus-app/
+!target/*-runner
+.git/
+.gitignore
+README.md
+*.log
+doc/

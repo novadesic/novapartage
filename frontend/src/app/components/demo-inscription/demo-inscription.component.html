@@ -1,0 +1,74 @@
+<div class="d-flex flex-column min-vh-100">
+  <app-navbar pageTitle="Invitation testeur"></app-navbar>
+
+  <main class="flex-grow-1 container py-4">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <h1 class="h3 mb-3">Inscription testeur NovaPartage</h1>
+
+        <div *ngIf="validating" class="alert alert-secondary">
+          <span class="spinner-border spinner-border-sm me-2"></span>
+          Vérification du lien…
+        </div>
+
+        <div *ngIf="!validating && !inviteValid" class="alert alert-warning">
+          <ng-container [ngSwitch]="validateReason">
+            <span *ngSwitchCase="'consumed'">Ce lien a déjà été utilisé.</span>
+            <span *ngSwitchCase="'expired'">Ce lien a expiré. Demandez une nouvelle invitation à votre contact NovaPartage.</span>
+            <span *ngSwitchCase="'missing'">Lien d'invitation manquant ou invalide. Utilisez le lien complet reçu par e-mail.</span>
+            <span *ngSwitchDefault>Lien d'invitation invalide ou indisponible.</span>
+          </ng-container>
+        </div>
+
+        <div *ngIf="activateDone" class="alert alert-success">
+          <i class="bi bi-check-circle me-2"></i>
+          Votre compte testeur est activé. Vous avez accès à NovaPartage pendant {{ entitlementDays }} jours sans abonnement.
+          <div class="mt-2">
+            <button type="button" class="btn btn-primary" (click)="goHome()">Accéder à l'application</button>
+          </div>
+        </div>
+
+        <div *ngIf="!validating && inviteValid && !activateDone && !successReserve" class="card shadow-sm">
+          <div class="card-body">
+            <p class="text-muted mb-3" *ngIf="inviteExpiresAt">
+              Ce lien est valide jusqu'au {{ inviteExpiresAt | date: 'longDate' }} (heure locale).
+            </p>
+            <p class="mb-3">
+              Saisissez l'adresse e-mail avec laquelle vous souhaitez utiliser NovaPartage.
+              Après validation de votre boîte, votre période testeur de <strong>{{ entitlementDays }} jours</strong> commencera.
+            </p>
+            <div class="mb-3">
+              <label class="form-label" for="demoEmail">Adresse e-mail</label>
+              <input
+                id="demoEmail"
+                type="email"
+                class="form-control"
+                [(ngModel)]="email"
+                autocomplete="email"
+                placeholder="vous@exemple.fr"
+              />
+            </div>
+            <div *ngIf="errorMessage" class="alert alert-danger py-2">{{ errorMessage }}</div>
+            <button
+              type="button"
+              class="btn btn-primary"
+              [disabled]="loading || !email"
+              (click)="submitReserve()"
+            >
+              <span *ngIf="loading" class="spinner-border spinner-border-sm me-1"></span>
+              Continuer
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="successReserve && !activateDone" class="alert alert-info">
+          <i class="bi bi-envelope-check me-2"></i>
+          Un message a été envoyé à <strong>{{ email }}</strong>. Ouvrez-le et cliquez sur le lien de connexion pour activer votre période testeur.
+          Une fois connecté, revenez sur cette page ou allez à l'accueil : l'activation se fera automatiquement.
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <app-footer></app-footer>
+</div>

@@ -1,0 +1,462 @@
+/* You can add global styles to this file, and also import other style files */
+
+/* Image d'arrière-plan discrète pour toute l'application */
+body {
+  background-image: url('/assets/background.jpg');
+  background-size: contain; /* Taille automatique pour garder les proportions */
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-color: rgba(255, 255, 255, 0.98); /* Fond blanc très légèrement transparent */
+  position: relative;
+  /* Position en bas à gauche avec marges */
+  background-position: 20px bottom; /* 20px de marge depuis la gauche, collé au bas */
+  /* Assurer que l'image est entièrement visible */
+  min-height: 100vh;
+}
+
+/* Overlay semi-transparent pour assurer la lisibilité du contenu */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.92); /* Overlay blanc plus transparent pour plus de discrétion */
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Assurer que les composants principaux ont un fond semi-transparent */
+app-root {
+  display: block;
+  min-height: 100vh;
+}
+
+/* Styles pour les composants avec des fonds opaques */
+.card, .navbar, .modal-content, .dropdown-menu {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(5px);
+}
+
+/* Assurer que les formulaires restent lisibles */
+.form-control, .form-select {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* Opacité des placeholders pour tous les form-control */
+.form-control::placeholder {
+  opacity: 0.4 !important;
+}
+
+/* Styles pour le sélecteur de thème */
+.theme-selector {
+  display: inline-block;
+  margin-right: 1rem;
+}
+
+.theme-selector .form-select {
+  min-width: 100px;
+  font-size: 0.875rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.theme-selector .form-select:focus {
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25);
+}
+
+.theme-selector .form-select option {
+  background-color: #343a40;
+  color: white;
+}
+
+/* Assurer que les thèmes Bootstrap sont chargés correctement */
+body {
+  transition: all 0.3s ease;
+}
+.container {
+  max-width: 10000px !important;
+  padding-left: 30px;
+  padding-right: 30px;
+}
+/* ng-wizard styles avancés */
+.ng-wizard {
+  .nav {
+    border-bottom: 1px solid #dee2e6;
+    background-color: #f8f9fa;
+    padding: 0;
+    margin-bottom: 2rem;
+  }
+  
+  .nav-pills {
+    .nav-link {
+      padding: 1rem 1.5rem;
+      text-decoration: none;
+      color: #6c757d;
+      background: transparent;
+      border: none;
+      border-radius: 0;
+      position: relative;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        background-color: #e9ecef;
+        color: #495057;
+      }
+      
+      &.active {
+        background: linear-gradient(135deg, #2071aa, #1a5d8a);
+        color: white;
+        font-weight: 600;
+        
+        &::after {
+          content: '';
+          position: absolute;
+          bottom: -1px;
+          left: 0;
+          right: 0;
+          height: 3px;
+          background: #2071aa;
+        }
+      }
+      
+      &.done {
+        background-color: #d1e7dd;
+        color: #0a3622;
+        
+        &::before {
+          content: '✓';
+          margin-right: 0.5rem;
+          font-weight: bold;
+        }
+      }
+      
+      &.disabled {
+        opacity: 0.6;
+        pointer-events: none;
+      }
+    }
+  }
+  
+  .tab-content {
+    padding: 2rem 0;
+    min-height: 400px;
+  }
+  
+  .wizard-toolbar {
+    border-top: 1px solid #dee2e6;
+    padding: 1.5rem 0;
+    text-align: right;
+    background-color: #f8f9fa;
+    margin-top: 2rem;
+    
+    .btn {
+      margin-left: 0.5rem;
+    }
+  }
+  
+  // Amélioration de l'apparence des étapes
+  .nav-item {
+    flex: 1;
+    text-align: center;
+  }
+  
+  // Style pour les numéros d'étapes
+  .nav-link {
+    &::before {
+      content: counter(step-counter);
+      counter-increment: step-counter;
+      display: inline-block;
+      width: 2rem;
+      height: 2rem;
+      line-height: 2rem;
+      background: #6c757d;
+      color: white;
+      border-radius: 50%;
+      margin-right: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: bold;
+    }
+    
+    &.active::before {
+      background: white;
+      color: #2071aa;
+    }
+    
+    &.done::before {
+      background: #198754;
+      content: '✓';
+    }
+  }
+}
+
+// Compteur pour les étapes
+.ng-wizard .nav {
+  counter-reset: step-counter;
+}
+
+/* Styles globaux pour les liens - uniquement si pas déjà surchargé */
+a:not(.brand-text):not(.nav-link):not(.btn):not(.dropdown-item):not(.btn-link) {
+  color: #2071aa;
+  text-decoration: none;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: #1a5d8a;
+    text-decoration: underline;
+  }
+
+  &:focus {
+    color: #2071aa;
+    outline: 2px solid #2071aa;
+    outline-offset: 2px;
+  }
+
+  &:visited {
+    color: #2071aa;
+  }
+}
+
+/* Styles globaux pour les boutons primaires - uniquement si pas déjà surchargé */
+.btn-primary:not([style*="background"]):not([style*="background-color"]) {
+  background-color: #2071aa !important;
+  border-color: #2071aa !important;
+  color: #fff !important;
+
+  &:hover,
+  &:focus {
+    background-color: #1a5d8a !important;
+    border-color: #1a5d8a !important;
+    color: #fff !important;
+  }
+
+  &:active,
+  &.active {
+    background-color: #155080 !important;
+    border-color: #155080 !important;
+    color: #fff !important;
+  }
+
+  &:disabled,
+  &.disabled {
+    background-color: #2071aa !important;
+    border-color: #2071aa !important;
+    opacity: 0.6;
+  }
+}
+
+/* Styles globaux pour les boutons outline primaires */
+.btn-outline-primary {
+  color: #2071aa !important;
+  border-color: #2071aa !important;
+  background-color: transparent !important;
+
+  &:hover,
+  &:focus {
+    background-color: #2071aa !important;
+    border-color: #2071aa !important;
+    color: #fff !important;
+  }
+
+  &:active,
+  &.active {
+    background-color: #1a5d8a !important;
+    border-color: #1a5d8a !important;
+    color: #fff !important;
+  }
+
+  &:disabled,
+  &.disabled {
+    color: #2071aa !important;
+    border-color: #2071aa !important;
+    opacity: 0.6;
+  }
+}
+
+/* Styles globaux pour les badges primaires */
+.badge.bg-primary,
+.badge.badge-primary {
+  background-color: #2071aa !important;
+  color: #fff !important;
+}
+
+/* Styles globaux pour les badges info */
+.badge.bg-info {
+  background-color: #2071aa !important;
+  color: #fff !important;
+}
+
+/* Styles globaux pour text-primary */
+.text-primary {
+  color: #2071aa !important;
+}
+
+/* Styles globaux pour text-info */
+.text-info {
+  color: #2071aa !important;
+}
+
+/* Styles globaux pour bg-primary - uniquement si pas déjà surchargé avec gradient */
+.bg-primary:not([style*="background"]):not([style*="background-color"]):not([style*="gradient"]) {
+  background-color: #2071aa !important;
+  background: #2071aa !important;
+}
+
+/* Styles globaux pour bg-info */
+.bg-info:not([style*="background"]):not([style*="background-color"]):not([style*="gradient"]) {
+  background-color: #2071aa !important;
+  background: #2071aa !important;
+  color: #fff !important;
+}
+
+/* Styles globaux pour border-primary */
+.border-primary {
+  border-color: #2071aa !important;
+}
+
+/* Styles globaux pour border-info */
+.border-info {
+  border-color: #2071aa !important;
+}
+
+/* Styles globaux pour les boutons outline-info */
+.btn-outline-info {
+  color: #2071aa !important;
+  border-color: #2071aa !important;
+  background-color: transparent !important;
+
+  &:hover,
+  &:focus {
+    background-color: #2071aa !important;
+    border-color: #2071aa !important;
+    color: #fff !important;
+  }
+
+  &:active,
+  &.active {
+    background-color: #1a5d8a !important;
+    border-color: #1a5d8a !important;
+    color: #fff !important;
+  }
+
+  &:disabled,
+  &.disabled {
+    color: #2071aa !important;
+    border-color: #2071aa !important;
+    opacity: 0.6;
+  }
+}
+
+/* Styles globaux pour les classes warning - Surcharge avec la couleur #cf3916 */
+.btn-warning:not([style*="background"]):not([style*="background-color"]) {
+  background-color: #cf3916 !important;
+  border-color: #cf3916 !important;
+  color: #fff !important;
+
+  &:hover,
+  &:focus {
+    background-color: #b03213 !important;
+    border-color: #b03213 !important;
+    color: #fff !important;
+  }
+
+  &:active,
+  &.active {
+    background-color: #9a2b10 !important;
+    border-color: #9a2b10 !important;
+    color: #fff !important;
+  }
+
+  &:disabled,
+  &.disabled {
+    background-color: #cf3916 !important;
+    border-color: #cf3916 !important;
+    opacity: 0.6;
+  }
+}
+
+/* Styles globaux pour les boutons outline-warning */
+.btn-outline-warning {
+  color: #cf3916 !important;
+  border-color: #cf3916 !important;
+  background-color: transparent !important;
+
+  &:hover,
+  &:focus {
+    background-color: #cf3916 !important;
+    border-color: #cf3916 !important;
+    color: #fff !important;
+  }
+
+  &:active,
+  &.active {
+    background-color: #b03213 !important;
+    border-color: #b03213 !important;
+    color: #fff !important;
+  }
+
+  &:disabled,
+  &.disabled {
+    color: #cf3916 !important;
+    border-color: #cf3916 !important;
+    opacity: 0.6;
+  }
+}
+
+/* Styles globaux pour les badges warning */
+.badge.bg-warning,
+.badge.badge-warning {
+  background-color: #cf3916 !important;
+  color: #fff !important;
+}
+
+/* Styles globaux pour text-warning */
+.text-warning {
+  color: #cf3916 !important;
+}
+
+/* Styles globaux pour bg-warning */
+.bg-warning:not([style*="background"]):not([style*="background-color"]):not([style*="gradient"]) {
+  background-color: #cf3916 !important;
+  background: #cf3916 !important;
+  color: #fff !important;
+}
+
+/* Styles globaux pour border-warning */
+.border-warning {
+  border-color: #cf3916 !important;
+}
+
+/* Styles globaux pour alert-warning */
+.alert-warning {
+  background-color: rgba(207, 57, 22, 0.1) !important;
+  border-color: #cf3916 !important;
+  color: #cf3916 !important;
+}
+
+/* Styles globaux pour table-warning */
+.table-warning,
+.table > :not(caption) > * > * {
+  &.table-warning {
+    background-color: rgba(207, 57, 22, 0.1) !important;
+    color: #cf3916 !important;
+  }
+}
+
+/* Styles globaux pour list-group-item-warning */
+.list-group-item-warning {
+  background-color: rgba(207, 57, 22, 0.1) !important;
+  border-color: #cf3916 !important;
+  color: #cf3916 !important;
+}
+
+/* Styles globaux pour progress-bar-warning */
+.progress-bar-warning {
+  background-color: #cf3916 !important;
+}

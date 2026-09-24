@@ -1,0 +1,46 @@
+// Styles pour le composant home (page privée)
+.card {
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.btn {
+  border-radius: 25px;
+  padding: 0.75rem 2rem;
+  font-weight: 500;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #2071aa 0%, #1a5d8a 100%);
+  border: none;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #1a5d8a 0%, #155080 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(32, 113, 170, 0.4);
+}
+
+.btn-outline-secondary {
+  border-color: #6c757d;
+  color: #6c757d;
+}
+
+.btn-outline-secondary:hover {
+  background-color: #6c757d;
+  border-color: #6c757d;
+  transform: translateY(-2px);
+}
+
+.bi {
+  font-size: 1.2em;
+}
+
+// Ajustement pour la navbar fixe
+.container-fluid {
+  padding-top: 0; // Supprime le padding-top car la navbar est fixe
+}
+
+main {
+  min-height: calc(100vh - 56px - 80px); // 100vh - navbar height - footer height
+}

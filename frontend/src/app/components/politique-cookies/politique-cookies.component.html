@@ -1,0 +1,291 @@
+<div class="container-fluid py-4">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-10 col-xl-8">
+      
+      <!-- En-tête -->
+      <div class="d-flex align-items-center mb-4">
+        <button type="button" 
+                class="btn btn-outline-secondary me-3" 
+                (click)="goBack()">
+          <i class="bi bi-arrow-left"></i>
+          Retour
+        </button>
+        <h1 class="mb-0">
+          <i class="bi bi-cookie me-2"></i>
+          Politique d'utilisation des cookies
+        </h1>
+      </div>
+
+      <!-- Informations sur le consentement actuel -->
+      <div class="alert alert-info mb-4" *ngIf="currentConsent">
+        <div class="d-flex align-items-start">
+          <i class="bi bi-info-circle me-2 mt-1"></i>
+          <div>
+            <h6 class="alert-heading mb-2">Vos préférences actuelles</h6>
+            <p class="mb-2">
+              <strong>Dernière mise à jour :</strong> {{ getConsentDate() }}
+            </p>
+            <div class="d-flex flex-wrap gap-2">
+              <span class="badge bg-success" *ngIf="isCookieTypeAllowed('necessary')">
+                <i class="bi bi-shield-check me-1"></i>
+                Cookies nécessaires
+              </span>
+              <span class="badge bg-info" *ngIf="isCookieTypeAllowed('analytics')">
+                <i class="bi bi-graph-up me-1"></i>
+                Cookies analytiques
+              </span>
+              <span class="badge bg-warning" *ngIf="isCookieTypeAllowed('marketing')">
+                <i class="bi bi-bullhorn me-1"></i>
+                Cookies marketing
+              </span>
+              <span class="badge bg-primary" *ngIf="isCookieTypeAllowed('preferences')">
+                <i class="bi bi-gear me-1"></i>
+                Cookies de préférences
+              </span>
+            </div>
+            <hr class="my-2">
+            <button type="button" 
+                    class="btn btn-sm btn-outline-primary" 
+                    (click)="modifyPreferences()">
+              <i class="bi bi-gear me-1"></i>
+              Modifier mes préférences
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contenu principal -->
+      <div class="card">
+        <div class="card-body">
+          
+          <!-- Introduction -->
+          <section class="mb-5">
+            <h2 class="h4 mb-3">
+              <i class="bi bi-info-circle me-2 text-primary"></i>
+              Qu'est-ce qu'un cookie ?
+            </h2>
+            <p>
+              Un cookie est un petit fichier texte stocké sur votre ordinateur, tablette ou smartphone 
+              lorsque vous visitez un site web. Les cookies permettent au site de reconnaître votre 
+              appareil et de mémoriser certaines informations sur vos préférences ou actions passées.
+            </p>
+            <p>
+              Cette politique explique comment nous utilisons les cookies sur notre site web et 
+              comment vous pouvez contrôler leur utilisation.
+            </p>
+          </section>
+
+          <!-- Types de cookies -->
+          <section class="mb-5">
+            <h2 class="h4 mb-4">
+              <i class="bi bi-list-ul me-2 text-primary"></i>
+              Types de cookies que nous utilisons
+            </h2>
+
+            <!-- Cookies nécessaires -->
+            <div class="card mb-3">
+              <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                  <i class="bi bi-shield-check me-2"></i>
+                  Cookies nécessaires
+                </h5>
+              </div>
+              <div class="card-body">
+                <p class="mb-3">
+                  Ces cookies sont essentiels au fonctionnement de notre site web et ne peuvent pas 
+                  être désactivés. Ils sont généralement définis en réponse à des actions que vous 
+                  effectuez et qui équivalent à une demande de services.
+                </p>
+                <div class="row">
+                  <div class="col-md-6">
+                    <h6>Exemples d'utilisation :</h6>
+                    <ul class="list-unstyled">
+                      <li><i class="bi bi-check-circle text-success me-2"></i>Authentification des utilisateurs</li>
+                      <li><i class="bi bi-check-circle text-success me-2"></i>Maintien de la sécurité</li>
+                      <li><i class="bi bi-check-circle text-success me-2"></i>Préférences de session</li>
+                      <li><i class="bi bi-check-circle text-success me-2"></i>Fonctionnalités de base</li>
+                    </ul>
+                  </div>
+                  <div class="col-md-6">
+                    <h6>Durée de conservation :</h6>
+                    <p class="text-muted">Session ou jusqu'à 1 an selon le type</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Cookies analytiques -->
+            <div class="card mb-3">
+              <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                  <i class="bi bi-graph-up me-2"></i>
+                  Cookies analytiques
+                </h5>
+              </div>
+              <div class="card-body">
+                <p class="mb-3">
+                  Ces cookies nous aident à comprendre comment les visiteurs interagissent avec notre 
+                  site web en collectant et rapportant des informations de manière anonyme.
+                </p>
+                <div class="row">
+                  <div class="col-md-6">
+                    <h6>Exemples d'utilisation :</h6>
+                    <ul class="list-unstyled">
+                      <li><i class="bi bi-check-circle text-info me-2"></i>Statistiques de navigation</li>
+                      <li><i class="bi bi-check-circle text-info me-2"></i>Temps passé sur le site</li>
+                      <li><i class="bi bi-check-circle text-info me-2"></i>Pages les plus visitées</li>
+                      <li><i class="bi bi-check-circle text-info me-2"></i>Sources de trafic</li>
+                    </ul>
+                  </div>
+                  <div class="col-md-6">
+                    <h6>Durée de conservation :</h6>
+                    <p class="text-muted">Jusqu'à 2 ans</p>
+                    <h6>Outils utilisés :</h6>
+                    <p class="text-muted">Google Analytics, outils internes</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Cookies marketing -->
+            <div class="card mb-3">
+              <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">
+                  <i class="bi bi-bullhorn me-2"></i>
+                  Cookies marketing
+                </h5>
+              </div>
+              <div class="card-body">
+                <p class="mb-3">
+                  Ces cookies sont utilisés pour diffuser des publicités plus pertinentes pour vous 
+                  et vos intérêts. Ils peuvent également être utilisés pour limiter le nombre de fois 
+                  que vous voyez une publicité.
+                </p>
+                <div class="row">
+                  <div class="col-md-6">
+                    <h6>Exemples d'utilisation :</h6>
+                    <ul class="list-unstyled">
+                      <li><i class="bi bi-check-circle text-warning me-2"></i>Publicités ciblées</li>
+                      <li><i class="bi bi-check-circle text-warning me-2"></i>Réseaux sociaux</li>
+                      <li><i class="bi bi-check-circle text-warning me-2"></i>Suivi des conversions</li>
+                      <li><i class="bi bi-check-circle text-warning me-2"></i>Mesure de l'efficacité publicitaire</li>
+                    </ul>
+                  </div>
+                  <div class="col-md-6">
+                    <h6>Durée de conservation :</h6>
+                    <p class="text-muted">Jusqu'à 1 an</p>
+                    <h6>Partenaires :</h6>
+                    <p class="text-muted">Réseaux publicitaires tiers</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Cookies de préférences -->
+            <div class="card mb-3">
+              <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                  <i class="bi bi-gear me-2"></i>
+                  Cookies de préférences
+                </h5>
+              </div>
+              <div class="card-body">
+                <p class="mb-3">
+                  Ces cookies permettent au site web de se souvenir de vos choix et préférences 
+                  pour vous offrir une expérience personnalisée.
+                </p>
+                <div class="row">
+                  <div class="col-md-6">
+                    <h6>Exemples d'utilisation :</h6>
+                    <ul class="list-unstyled">
+                      <li><i class="bi bi-check-circle text-primary me-2"></i>Langue préférée</li>
+                      <li><i class="bi bi-check-circle text-primary me-2"></i>Thème d'affichage</li>
+                      <li><i class="bi bi-check-circle text-primary me-2"></i>Paramètres d'interface</li>
+                      <li><i class="bi bi-check-circle text-primary me-2"></i>Localisation</li>
+                    </ul>
+                  </div>
+                  <div class="col-md-6">
+                    <h6>Durée de conservation :</h6>
+                    <p class="text-muted">Jusqu'à 1 an</p>
+                    <h6>Avantages :</h6>
+                    <p class="text-muted">Expérience personnalisée</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Gestion des cookies -->
+          <section class="mb-5">
+            <h2 class="h4 mb-3">
+              <i class="bi bi-gear me-2 text-primary"></i>
+              Comment gérer vos préférences de cookies
+            </h2>
+            <p>
+              Vous pouvez à tout moment modifier vos préférences de cookies en utilisant les options 
+              ci-dessous ou en cliquant sur le bouton "Modifier mes préférences" en haut de cette page.
+            </p>
+            
+            <div class="row">
+              <div class="col-md-6">
+                <div class="card h-100">
+                  <div class="card-body text-center">
+                    <i class="bi bi-gear-fill text-primary mb-3" style="font-size: 2rem;"></i>
+                    <h5 class="card-title">Paramètres du site</h5>
+                    <p class="card-text">
+                      Utilisez le bouton ci-dessus pour modifier vos préférences de cookies 
+                      directement sur notre site.
+                    </p>
+                    <button type="button" 
+                            class="btn btn-primary" 
+                            (click)="modifyPreferences()">
+                      <i class="bi bi-gear me-1"></i>
+                      Modifier mes préférences
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="card h-100">
+                  <div class="card-body text-center">
+                    <i class="bi bi-browser text-info mb-3" style="font-size: 2rem;"></i>
+                    <h5 class="card-title">Paramètres du navigateur</h5>
+                    <p class="card-text">
+                      Vous pouvez également gérer les cookies directement dans les paramètres 
+                      de votre navigateur web.
+                    </p>
+                    <button type="button" 
+                            class="btn btn-outline-info" 
+                            (click)="alert('Consultez les paramètres de votre navigateur dans la section Confidentialité ou Cookies')">
+                      <i class="bi bi-info-circle me-1"></i>
+                      En savoir plus
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Contact -->
+          <section class="mb-4">
+            <h2 class="h4 mb-3">
+              <i class="bi bi-envelope me-2 text-primary"></i>
+              Contact
+            </h2>
+            <p>
+              Si vous avez des questions concernant notre utilisation des cookies ou cette politique, 
+              n'hésitez pas à nous contacter.
+            </p>
+            <div class="alert alert-light">
+              <h6 class="alert-heading">Informations de contact :</h6>
+              <p class="mb-1"><strong>Email :</strong> privacy&#64;datadesic.com</p>
+              <p class="mb-0"><strong>Dernière mise à jour :</strong> {{ getCurrentDate() }}</p>
+            </div>
+          </section>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

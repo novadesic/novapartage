@@ -1,0 +1,169 @@
+.card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+}
+
+.text-truncate {
+  max-width: 200px;
+}
+
+.bg-light {
+  background-color: #f8f9fa !important;
+}
+
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+}
+
+.dropdown-menu {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border: none;
+}
+
+.badge {
+  font-size: 0.75rem;
+}
+
+.btn-outline-secondary:hover {
+  background-color: #6c757d;
+  border-color: #6c757d;
+}
+
+.card-title {
+  font-weight: 600;
+  
+  a {
+    transition: color 0.2s ease;
+    
+    &:hover {
+      color: #2071aa !important;
+    }
+  }
+}
+
+.rounded-circle {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// Styles pour les en-têtes triables
+.cursor-pointer {
+  cursor: pointer;
+  user-select: none;
+  
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+  
+  th {
+    position: relative;
+    
+    i:last-child {
+      margin-left: 0.5rem;
+      font-size: 0.8rem;
+    }
+  }
+}
+
+// Amélioration du tableau
+.table {
+  th {
+    border-top: none;
+    font-weight: 600;
+    color: #495057;
+  }
+  
+  td {
+    vertical-align: middle;
+  }
+  
+  .btn-group {
+    .btn {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.875rem;
+    }
+  }
+  
+  // Style pour les partages supprimés
+  .table-muted {
+    opacity: 0.6;
+    background-color: #f8f9fa;
+    
+    td {
+      color: #6c757d;
+    }
+    
+    .badge {
+      opacity: 0.8;
+    }
+  }
+  
+  // Style pour les partages inactifs
+  .table-inactive {
+    opacity: 0.8;
+    background-color: #f8f9fa;
+    
+    td {
+      color: #6c757d;
+    }
+  }
+}
+
+// Styles pour les filtres
+.form-check-inline {
+  margin-right: 1rem;
+  
+  .form-check-input {
+    &:checked {
+      background-color: #2071aa;
+      border-color: #2071aa;
+    }
+  }
+  
+  .form-check-label {
+    font-size: 0.875rem;
+    color: #495057;
+    cursor: pointer;
+    
+    &:hover {
+      color: #2071aa;
+    }
+  }
+}
+
+// Amélioration des badges de statut
+.badge {
+  &.bg-secondary {
+    background-color: #6c757d !important;
+  }
+  
+  &.bg-dark {
+    background-color: #212529 !important;
+  }
+  
+  &.bg-success {
+    background-color: #198754 !important;
+  }
+  
+  &.bg-warning {
+    background-color: #ffc107 !important;
+    color: #000 !important;
+  }
+  
+  &.bg-danger {
+    background-color: #dc3545 !important;
+  }
+  
+  &.bg-info {
+    background-color: #2071aa !important;
+    color: #fff !important;
+  }
+} 

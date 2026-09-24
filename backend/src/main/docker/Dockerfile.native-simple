@@ -1,0 +1,39 @@
+####
+# Dockerfile simplifié pour le backend ddsshare en mode native
+# Basé sur UBI 9 minimal pour une image légère
+#
+# Build de l'application:
+# ./mvnw clean package -Dnative
+#
+# Construction de l'image:
+# docker build -f src/main/docker/Dockerfile.native-simple -t ghcr.io/novadesic/novapartage-backend:latest .
+#
+# Exécution du conteneur:
+# docker run -i --rm -p 8080:8080 ghcr.io/novadesic/novapartage-backend:latest
+####
+
+FROM registry.access.redhat.com/ubi9/ubi-minimal:9.5
+
+######################### Set up environment for POI #############################
+RUN microdnf update -y && microdnf install -y freetype fontconfig ca-certificates && microdnf clean all
+######################### Set up environment for POI #############################
+
+# Configuration du répertoire de travail
+WORKDIR /work/
+
+# Configuration des permissions
+RUN chown 1001 /work \
+    && chmod "g+rwX" /work \
+    && chown 1001:root /work
+
+# Copie de l'exécutable natif
+COPY --chown=1001:root --chmod=0755 target/*-runner /work/application
+
+# Exposition du port
+EXPOSE 8080
+
+# Utilisateur non-root pour la sécurité
+USER 1001
+
+# Point d'entrée avec configuration pour écouter sur toutes les interfaces
+ENTRYPOINT ["./application", "-Dquarkus.http.host=0.0.0.0"] 

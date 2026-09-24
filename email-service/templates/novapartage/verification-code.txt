@@ -1,0 +1,22 @@
+NovaPartage
+Partagez des données, pas vos fichiers.
+
+Code de vérification
+
+---
+
+Bonjour,
+
+Vous avez demandé une vérification d'email pour finaliser votre action sur NovaPartage.
+
+Code de vérification : {{verificationCode}}
+
+Entrez ce code dans l'application pour finaliser votre action.
+
+⏱️ Ce code est valide jusqu'au {{expiresAtFormatted}}.
+
+---
+Cet email a été envoyé automatiquement par NovaPartage
+Si vous n'avez pas demandé cet email, vous pouvez l'ignorer.
+
+https://novapartage.fr

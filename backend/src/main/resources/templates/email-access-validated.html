@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Partage validé - NovaPartage</title>
+</head>
+<body>
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
+            <div style="display: inline-block; background: rgba(255,255,255,0.2); padding: 15px; border-radius: 10px;">
+                <h1 style="margin: 0; font-size: 32px; font-weight: bold; letter-spacing: 2px;">NovaPartage</h1>
+            </div>
+            <p style="margin: 10px 0 0 0; opacity: 0.9; font-size: 16px;">✅ Partage validé</p>
+        </div>
+        
+        <div style="background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px;">
+            <h2 style="color: #333; margin-top: 0;">Bonjour,</h2>
+            
+            <p style="color: #555; line-height: 1.6;">
+                <strong>{{recipientEmail}}</strong> a validé le partage de données.
+            </p>
+            
+            <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #28a745;">
+                <h3 style="color: #333; margin-top: 0;">📊 Informations de validation</h3>
+                <p style="margin: 5px 0; color: #555;"><strong>Nom du partage:</strong> {{formName}}</p>
+                <p style="margin: 5px 0; color: #555;"><strong>Fichier:</strong> {{fileName}}</p>
+                <p style="margin: 5px 0; color: #555;"><strong>Destinataire:</strong> {{recipientEmail}}</p>
+                <p style="margin: 5px 0; color: #555;"><strong>Validé par:</strong> {{validatedBy}}</p>
+                <p style="margin: 5px 0; color: #555;"><strong>Date de validation:</strong> {{validatedDate}}</p>
+            </div>
+            
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="{{shareDetailUrl}}"
+                   style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                          color: white;
+                          padding: 15px 30px;
+                          text-decoration: none;
+                          border-radius: 25px;
+                          display: inline-block;
+                          font-weight: bold;
+                          font-size: 16px;">
+                    📋 Voir le détail du partage
+                </a>
+            </div>
+            
+            <div style="background: #d4edda; border: 1px solid #c3e6cb; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                <p style="margin: 0; color: #155724; font-size: 14px;">
+                    <strong>✅ Confirmation:</strong> Le destinataire a bien validé le partage.
+                </p>
+            </div>
+            
+            <p style="color: #666; font-size: 14px; line-height: 1.5;">
+                Vous pouvez suivre l'activité de vos partages depuis votre tableau de bord NovaPartage.
+            </p>
+        </div>
+        
+        <div style="text-align: center; margin-top: 20px; padding: 20px; color: #999; font-size: 12px;">
+            <p>Cet email a été envoyé automatiquement par NovaPartage</p>
+        </div>
+    </div>
+</body>
+</html>
+

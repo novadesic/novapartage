@@ -1,0 +1,23 @@
+{
+  "success": true,
+  "fileId": "test-file-123",
+  "fileName": "simple-excel.xlsx",
+  "fileSize": 1024,
+  "sheets": [
+    {
+      "name": "Feuille1",
+      "index": 0,
+      "data": [
+        ["Nom", "Email", "Téléphone"],
+        ["Jean Dupont", "jean.dupont@exemple.com", "0123456789"],
+        ["Marie Martin", "marie.martin@exemple.com", "0987654321"]
+      ],
+      "columns": 3,
+      "rows": 3
+    }
+  ],
+  "message": "Fichier Excel chargé avec succès"
+}
+
+
+

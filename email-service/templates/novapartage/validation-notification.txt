@@ -1,0 +1,31 @@
+NovaPartage
+Partagez des données, pas vos fichiers.
+
+Partage validé
+
+---
+
+Bonjour,
+
+{{recipientEmail}} a validé le partage de données.
+
+Informations de validation
+==========================
+Nom du partage: {{formName}}
+Nom du fichier d'origine: {{fileName}}
+Destinataire: {{recipientEmail}}
+Validé par: {{validatedBy}}
+Date de validation: {{validatedDate}}
+
+Voir le détail du partage :
+{{shareDetailUrl}}
+
+✅ Confirmation: Le destinataire a bien validé le partage.
+
+Vous pouvez suivre l'activité de vos partages depuis votre tableau de bord NovaPartage.
+
+---
+Cet email a été envoyé automatiquement par NovaPartage
+Si vous n'avez pas demandé cet email, vous pouvez l'ignorer.
+
+https://novapartage.fr

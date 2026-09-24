@@ -1,0 +1,225 @@
+<!-- Modal de consentement aux cookies -->
+<div class="modal fade" 
+     [class.show]="showModal" 
+     [style.display]="showModal ? 'block' : 'none'" 
+     tabindex="-1" 
+     role="dialog"
+     aria-labelledby="cookieConsentModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content cookie-consent-modal">
+      <div class="modal-header">
+        <h5 class="modal-title" id="cookieConsentModalLabel">
+          <i class="bi bi-cookie me-2"></i>
+          Cookies
+        </h5>
+        <button type="button" 
+                class="btn-close" 
+                (click)="closeModal()"
+                aria-label="Fermer"
+                *ngIf="cookieService.hasConsent()">
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <!-- Message principal -->
+        <div class="cookie-message">
+          <p class="mb-3">
+            Nous utilisons des cookies pour améliorer votre expérience, ainsi qu'à des fins de marketing. 
+            Pour en savoir plus, consultez notre 
+            <a href="#" 
+               (click)="goToCookiePolicy(); $event.preventDefault()" 
+               class="text-decoration-underline">
+              politique sur l'utilisation des cookies
+            </a>.
+          </p>
+        </div>
+
+        <!-- Détails des cookies (collapsible) -->
+        <div class="cookie-details" *ngIf="showDetails">
+          <div class="accordion" id="cookieAccordion">
+            
+            <!-- Cookies nécessaires -->
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button" 
+                        type="button" 
+                        data-bs-toggle="collapse" 
+                        data-bs-target="#necessaryCookies" 
+                        aria-expanded="true" 
+                        aria-controls="necessaryCookies">
+                  <i class="bi bi-shield-check me-2 text-success"></i>
+                  Cookies nécessaires
+                </button>
+              </h2>
+              <div id="necessaryCookies" 
+                   class="accordion-collapse collapse show" 
+                   data-bs-parent="#cookieAccordion">
+                <div class="accordion-body">
+                  <p class="mb-2">Ces cookies sont essentiels au fonctionnement du site web et ne peuvent pas être désactivés.</p>
+                  <small class="text-muted">
+                    <strong>Exemples :</strong> Authentification, sécurité, préférences de session, panier d'achat
+                  </small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Cookies analytiques -->
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button collapsed" 
+                        type="button" 
+                        data-bs-toggle="collapse" 
+                        data-bs-target="#analyticsCookies" 
+                        aria-expanded="false" 
+                        aria-controls="analyticsCookies">
+                  <i class="bi bi-graph-up me-2 text-info"></i>
+                  Cookies analytiques
+                </button>
+              </h2>
+              <div id="analyticsCookies" 
+                   class="accordion-collapse collapse" 
+                   data-bs-parent="#cookieAccordion">
+                <div class="accordion-body">
+                  <div class="form-check">
+                    <input class="form-check-input" 
+                           type="checkbox" 
+                           id="analyticsCheck" 
+                           [(ngModel)]="cookiePreferences.analytics">
+                    <label class="form-check-label" for="analyticsCheck">
+                      <strong>Autoriser les cookies analytiques</strong>
+                    </label>
+                  </div>
+                  <p class="mb-2 mt-2">Ces cookies nous aident à comprendre comment les visiteurs interagissent avec notre site web.</p>
+                  <small class="text-muted">
+                    <strong>Exemples :</strong> Google Analytics, statistiques de navigation, temps passé sur le site
+                  </small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Cookies marketing -->
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button collapsed" 
+                        type="button" 
+                        data-bs-toggle="collapse" 
+                        data-bs-target="#marketingCookies" 
+                        aria-expanded="false" 
+                        aria-controls="marketingCookies">
+                  <i class="bi bi-bullhorn me-2 text-warning"></i>
+                  Cookies marketing
+                </button>
+              </h2>
+              <div id="marketingCookies" 
+                   class="accordion-collapse collapse" 
+                   data-bs-parent="#cookieAccordion">
+                <div class="accordion-body">
+                  <div class="form-check">
+                    <input class="form-check-input" 
+                           type="checkbox" 
+                           id="marketingCheck" 
+                           [(ngModel)]="cookiePreferences.marketing">
+                    <label class="form-check-label" for="marketingCheck">
+                      <strong>Autoriser les cookies marketing</strong>
+                    </label>
+                  </div>
+                  <p class="mb-2 mt-2">Ces cookies sont utilisés pour diffuser des publicités plus pertinentes pour vous.</p>
+                  <small class="text-muted">
+                    <strong>Exemples :</strong> Publicités ciblées, réseaux sociaux, suivi des conversions
+                  </small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Cookies de préférences -->
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button collapsed" 
+                        type="button" 
+                        data-bs-toggle="collapse" 
+                        data-bs-target="#preferencesCookies" 
+                        aria-expanded="false" 
+                        aria-controls="preferencesCookies">
+                  <i class="bi bi-gear me-2 text-primary"></i>
+                  Cookies de préférences
+                </button>
+              </h2>
+              <div id="preferencesCookies" 
+                   class="accordion-collapse collapse" 
+                   data-bs-parent="#cookieAccordion">
+                <div class="accordion-body">
+                  <div class="form-check">
+                    <input class="form-check-input" 
+                           type="checkbox" 
+                           id="preferencesCheck" 
+                           [(ngModel)]="cookiePreferences.preferences">
+                    <label class="form-check-label" for="preferencesCheck">
+                      <strong>Autoriser les cookies de préférences</strong>
+                    </label>
+                  </div>
+                  <p class="mb-2 mt-2">Ces cookies permettent au site web de se souvenir de vos choix et préférences.</p>
+                  <small class="text-muted">
+                    <strong>Exemples :</strong> Langue, thème, paramètres d'affichage, localisation
+                  </small>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Bouton pour afficher/masquer les détails -->
+        <div class="text-center mt-3">
+          <button type="button" 
+                  class="btn btn-link btn-sm" 
+                  (click)="toggleDetails()">
+            <i class="bi" [class.bi-chevron-down]="!showDetails" [class.bi-chevron-up]="showDetails"></i>
+            {{ showDetails ? 'Masquer les détails' : 'Personnaliser mes préférences' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="modal-footer">
+        <div class="d-flex justify-content-between w-100">
+          <!-- Boutons de refus -->
+          <button type="button" 
+                  class="btn btn-outline-secondary" 
+                  (click)="rejectAll()">
+            <i class="bi bi-x-circle me-1"></i>
+            Refuser les cookies
+          </button>
+
+          <!-- Boutons d'acceptation -->
+          <div class="btn-group" role="group">
+            <button type="button" 
+                    class="btn btn-outline-primary" 
+                    (click)="savePreferences()"
+                    [disabled]="!hasSelectedPreferences()"
+                    *ngIf="showDetails">
+              <i class="bi bi-gear me-1"></i>
+              Sauvegarder mes préférences
+            </button>
+            <button type="button" 
+                    class="btn btn-primary" 
+                    (click)="acceptAll()">
+              <i class="bi bi-check-circle me-1"></i>
+              C'est OK pour moi
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Backdrop -->
+<div class="modal-backdrop fade show" *ngIf="showModal"></div>
+
+
+
+
+
+
+

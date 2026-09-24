@@ -1,0 +1,39 @@
+.forms-preview-container {
+  .preview-header {
+    margin-bottom: 20px;
+  }
+
+  .recipient-navigation {
+    .recipient-info {
+      font-size: 1.1rem;
+    }
+  }
+
+  .recipient-tabs {
+    .nav-pills {
+      flex-wrap: wrap;
+      
+      .nav-link {
+        margin-right: 5px;
+        margin-bottom: 5px;
+        font-size: 0.9rem;
+        padding: 0.5rem 1rem;
+        
+        &.active {
+          background-color: #2071aa;
+          color: white;
+        }
+      }
+    }
+  }
+
+  .preview-content {
+    min-height: 400px;
+  }
+
+  .no-recipients {
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    background: #f8f9fa;
+  }
+} 

@@ -1,0 +1,220 @@
+# NovaPartage — stack self-host complète (backend + frontend buildés)
+#
+# cp env.example .env
+# ./scripts/generate-secrets.sh --write
+# docker compose -f docker-compose.selfhost.yml up --build -d
+# ./scripts/init-superadmin.sh admin@example.com
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: novapartage-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-novapartage}
+      POSTGRES_USER: ${POSTGRES_USER:-novapartage}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - novapartage-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-novapartage} -d ${POSTGRES_DB:-novapartage}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  redis:
+    image: redis:7-alpine
+    container_name: novapartage-redis
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - novapartage-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  mailhog:
+    image: axllent/mailpit:latest
+    container_name: novapartage-webmail
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - novapartage-network
+    restart: unless-stopped
+
+  email-service:
+    build:
+      context: ./email-service
+      dockerfile: docker/Dockerfile
+    container_name: novapartage-email
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: ${EMAIL_PORT:-3002}
+      HOST: ${EMAIL_HOST:-0.0.0.0}
+      SMTP_ENABLED: ${SMTP_ENABLED:-true}
+      SMTP_NAME: ${SMTP_NAME:-smtp-default}
+      SMTP_PRIORITY: ${SMTP_PRIORITY:-10}
+      SMTP_HOST: ${SMTP_HOST:-mailhog}
+      SMTP_PORT: ${SMTP_PORT:-1025}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: ${SMTP_FROM:-no-reply@novapartage.fr}
+      SMTP_IGNORE_TLS: ${SMTP_IGNORE_TLS:-true}
+      SMTP_REQUIRE_TLS: ${SMTP_REQUIRE_TLS:-false}
+      SMTP_TLS_REJECT_UNAUTHORIZED: ${SMTP_TLS_REJECT_UNAUTHORIZED:-false}
+      MAILJET_ENABLED: ${MAILJET_ENABLED:-false}
+    depends_on:
+      - mailhog
+    networks:
+      - novapartage-network
+    restart: unless-stopped
+
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: docker/Dockerfile
+    container_name: novapartage-auth
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: ${AUTH_PORT:-3001}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set in .env}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-30m}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
+      JWT_ALGORITHM: ${JWT_ALGORITHM:-HS256}
+      JWT_ISSUER: ${JWT_ISSUER:-novapartage-auth}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-novapartage-frontend}
+      MAX_SESSION_DURATION: ${MAX_SESSION_DURATION:-36000}
+      MAX_REFRESH_COUNT: ${MAX_REFRESH_COUNT:-20}
+      MAX_IDLE_TIME: ${MAX_IDLE_TIME:-1800}
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      REDIS_DB: ${REDIS_DB:-0}
+      REDIS_ENABLED: ${REDIS_ENABLED:-true}
+      CSRF_SECRET: ${CSRF_SECRET:?CSRF_SECRET must be set in .env}
+      SECURITY_HEADERS_ENABLED: ${SECURITY_HEADERS_ENABLED:-true}
+      RATE_LIMIT_ENABLED: ${RATE_LIMIT_ENABLED:-true}
+      CSP_ENABLED: ${CSP_ENABLED:-true}
+      HSTS_ENABLED: ${HSTS_ENABLED:-false}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost,http://localhost:4200}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost}
+      AUTH_CALLBACK_URL: ${AUTH_CALLBACK_URL:-http://localhost/auth/callback}
+      EMAIL_SERVICE_URL: ${EMAIL_SERVICE_URL:-http://email-service:3002}
+      EMAIL_SERVICE_TIMEOUT: ${EMAIL_SERVICE_TIMEOUT:-10000}
+      SMTP_FROM: ${SMTP_FROM:-no-reply@novapartage.fr}
+      EMAIL_SUBJECT: ${EMAIL_SUBJECT:-Lien de connexion NovaPartage}
+      RATE_LIMIT_WINDOW_MS: ${RATE_LIMIT_WINDOW_MS:-900000}
+      RATE_LIMIT_MAX_REQUESTS: ${RATE_LIMIT_MAX_REQUESTS:-100}
+      AUTH_RATE_LIMIT_WINDOW_MS: ${AUTH_RATE_LIMIT_WINDOW_MS:-900000}
+      AUTH_RATE_LIMIT_MAX_REQUESTS: ${AUTH_RATE_LIMIT_MAX_REQUESTS:-5}
+      TOKEN_RATE_LIMIT_WINDOW_MS: ${TOKEN_RATE_LIMIT_WINDOW_MS:-900000}
+      TOKEN_RATE_LIMIT_MAX_REQUESTS: ${TOKEN_RATE_LIMIT_MAX_REQUESTS:-300}
+      EMAIL_RATE_LIMIT_WINDOW_MS: ${EMAIL_RATE_LIMIT_WINDOW_MS:-3600000}
+      EMAIL_RATE_LIMIT_MAX_REQUESTS: ${EMAIL_RATE_LIMIT_MAX_REQUESTS:-10}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      COOKIE_SAME_SITE: ${COOKIE_SAME_SITE:-lax}
+      COOKIE_DOMAIN: ${COOKIE_DOMAIN:-localhost}
+      COOKIE_HTTP_ONLY: ${COOKIE_HTTP_ONLY:-true}
+      COOKIE_MAX_AGE: ${COOKIE_MAX_AGE:-3600000}
+      TOKEN_STORAGE_METHOD: ${TOKEN_STORAGE_METHOD:-localStorage}
+      JWT_VALIDATION_MODE: ${JWT_VALIDATION_MODE:-client}
+      TEMP_TOKEN_EXPIRES_IN: ${TEMP_TOKEN_EXPIRES_IN:-1h}
+      VERIFICATION_CODE_EXPIRES_IN: ${VERIFICATION_CODE_EXPIRES_IN:-15m}
+      MAX_VERIFICATION_ATTEMPTS: ${MAX_VERIFICATION_ATTEMPTS:-5}
+      DB_HOST: ${DB_HOST:-postgres}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_NAME: ${DB_NAME:-novapartage}
+      DB_USERNAME: ${DB_USERNAME:-novapartage}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be set in .env}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      email-service:
+        condition: service_started
+    networks:
+      - novapartage-network
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: novapartage-backend
+    environment:
+      QUARKUS_PROFILE: prod
+      QUARKUS_HTTP_PORT: 8083
+      APP_AUTH_JWT_SECRET: ${APP_AUTH_JWT_SECRET:?APP_AUTH_JWT_SECRET must be set in .env}
+      APP_ENCRYPTION_MASTER_KEY: ${APP_ENCRYPTION_MASTER_KEY:?APP_ENCRYPTION_MASTER_KEY must be set in .env}
+      APP_FILE_STORAGE_BASE_PATH: ${APP_FILE_STORAGE_BASE_PATH:-/app/files}
+      DB_HOST: ${DB_HOST:-postgres}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_NAME: ${DB_NAME:-novapartage}
+      DB_USERNAME: ${DB_USERNAME:-novapartage}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be set in .env}
+    volumes:
+      - ./user_files:/app/files
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - novapartage-network
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.selfhost
+    container_name: novapartage-frontend
+    environment:
+      CUSTOM_AUTH_ENDPOINT: ${CUSTOM_AUTH_ENDPOINT:-http://localhost/auth}
+      BACKEND_URL: ${BACKEND_URL:-http://localhost/backend}
+      BACKEND_API_PATH: ${BACKEND_API_PATH:-/api}
+      APP_NAME: ${APP_NAME:-NovaPartage}
+      APP_VERSION: ${APP_VERSION:-1.0.0}
+      PRODUCTION: ${PRODUCTION:-true}
+      MAX_RECIPIENTS_PER_SHARE: ${MAX_RECIPIENTS_PER_SHARE:-5}
+      MAX_FILE_SIZE: ${MAX_FILE_SIZE:-50MB}
+      MAX_SELECTED_COLUMNS: ${MAX_SELECTED_COLUMNS:-20}
+    networks:
+      - novapartage-network
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    container_name: novapartage-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.selfhost.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/frontend-fallback.html:/etc/nginx/frontend-fallback.html:ro
+      - ./nginx/logo.png:/etc/nginx/logo.png:ro
+      - ./nginx/background.jpg:/etc/nginx/background.jpg:ro
+    depends_on:
+      - frontend
+      - backend
+      - auth-service
+    networks:
+      - novapartage-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  novapartage-network:
+    driver: bridge

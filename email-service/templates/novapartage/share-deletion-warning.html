@@ -1,0 +1,55 @@
+<h2 style="color: #333; margin-top: 0;">Bonjour,</h2>
+
+<p style="color: #555; line-height: 1.6;">
+    Votre partage <strong>{{shareName}}</strong> est inactif depuis plus de {{monthsInactive}} mois et sera automatiquement supprimé dans {{daysRemaining}} jour{{daysRemainingPlural}}.
+</p>
+
+<div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #dc3545;">
+    <h3 style="color: #333; margin-top: 0;">⚠️ Suppression programmée</h3>
+    <p style="margin: 5px 0; color: #555;"><strong>Nom du partage:</strong> {{shareName}}</p>
+    <p style="margin: 5px 0; color: #555;"><strong>Date de création:</strong> {{createdAtFormatted}}</p>
+    <p style="margin: 5px 0; color: #555;"><strong>Dernière modification:</strong> {{updatedAtFormatted}}</p>
+    <p style="margin: 5px 0; color: #dc3545; font-weight: bold;"><strong>Date de suppression:</strong> {{deletionDateFormatted}}</p>
+</div>
+
+<div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 20px 0;">
+    <p style="margin: 0; color: #856404; font-size: 14px;">
+        <strong>⚠️ Important:</strong> Après la suppression, toutes les données associées à ce partage seront définitivement supprimées :
+    </p>
+    <ul style="margin: 10px 0 0 20px; color: #856404; font-size: 14px;">
+        <li>Le fichier Excel</li>
+        <li>Les données de formulaires</li>
+        <li>Les liens d'accès</li>
+        <li>L'historique du partage</li>
+    </ul>
+</div>
+
+<div style="text-align: center; margin: 30px 0;">
+    <a href="{{manageSharesUrl}}" 
+       style="background-color: #dc3545; background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); 
+              color: white; 
+              padding: 15px 30px; 
+              text-decoration: none; 
+              border-radius: 25px; 
+              display: inline-block; 
+              font-weight: bold;
+              font-size: 16px;">
+        🔗 Gérer mes partages
+    </a>
+</div>
+
+<p style="color: #999; font-size: 12px; line-height: 1.5; margin: 15px 0; text-align: center;">
+    ou copier le lien suivant dans un navigateur :
+</p>
+<p style="word-break: break-all; color: #666; background: #f8f9fa; padding: 10px; border-radius: 5px; font-family: monospace; font-size: 11px; margin: 0 0 25px 0;">{{manageSharesUrl}}</p>
+
+<div style="background: #e7f3ff; border: 1px solid #b3d9ff; padding: 15px; border-radius: 5px; margin: 20px 0;">
+    <p style="margin: 0; color: #004085; font-size: 14px;">
+        <strong>💡 Astuce:</strong> Si vous souhaitez conserver ce partage, vous pouvez le réactiver en y accédant depuis votre espace de gestion.
+    </p>
+</div>
+
+<p style="color: #666; font-size: 14px; line-height: 1.5;">
+    Si vous avez des questions, vous pouvez nous contacter à <strong>privacy&#64;novadesic.com</strong>.
+</p>
+

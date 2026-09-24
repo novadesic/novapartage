@@ -1,0 +1,212 @@
+/* Styles pour le composant index (page publique) */
+
+/* Test de l'arrière-plan */
+body {
+  position: relative;
+}
+
+.lead {
+  font-size: 1.8rem;
+  font-weight: 300;
+  line-height: 1.5;
+  font-style: normal;
+  margin-bottom: 1rem;
+  color: #6c757d;
+}
+/* Assurer que le contenu est au-dessus de l'arrière-plan */
+.container, .row, .col {
+  position: relative;
+  z-index: 1;
+}
+
+.navbar-brand {
+  font-size: 1.5rem;
+}
+
+.card {
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.btn {
+  border-radius: 25px;
+  padding: 0.75rem 2rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #2071aa 0%, #1a5d8a 100%);
+  border: none;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #1a5d8a 0%, #155080 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(32, 113, 170, 0.4);
+}
+
+.btn-outline-secondary {
+  border-color: #6c757d;
+  color: #6c757d;
+}
+
+.btn-outline-secondary:hover {
+  background-color: #6c757d;
+  border-color: #6c757d;
+  transform: translateY(-2px);
+}
+
+.btn-light {
+  background-color: #f8f9fa;
+  border-color: #f8f9fa;
+  color: #212529;
+}
+
+.btn-light:hover {
+  background-color: #e9ecef;
+  border-color: #e9ecef;
+  transform: translateY(-2px);
+}
+
+.bi {
+  font-size: 1.2em;
+}
+
+
+
+/* Animations pour les icônes des fonctionnalités */
+.bi-shield-check,
+.bi-lightning,
+.bi-people {
+  transition: transform 0.3s ease;
+}
+
+.bi-shield-check:hover,
+.bi-lightning:hover,
+.bi-people:hover {
+  transform: scale(1.1);
+}
+
+/* Styles pour le modal de connexion */
+.modal {
+  z-index: 1055;
+}
+
+.modal-backdrop {
+  z-index: 1050;
+}
+
+.modal-content {
+  border-radius: 15px;
+  border: none;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+  border-bottom: 1px solid #e9ecef;
+  border-radius: 15px 15px 0 0;
+  background: linear-gradient(135deg, #2071aa 0%, #1a5d8a 100%);
+  color: white;
+}
+
+.modal-header .btn-close {
+  filter: invert(1);
+}
+
+.modal-body {
+  padding: 2rem;
+}
+
+.form-control {
+  border-radius: 10px;
+  border: 2px solid #e9ecef;
+  padding: 0.75rem 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-control:focus {
+  border-color: #2071aa;
+  box-shadow: 0 0 0 0.2rem rgba(32, 113, 170, 0.25);
+}
+
+.btn-primary {
+  border-radius: 10px;
+  padding: 0.75rem 2rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(32, 113, 170, 0.4);
+}
+
+.btn-outline-primary {
+  border-radius: 10px;
+  padding: 0.75rem 2rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-outline-primary:hover {
+  transform: translateY(-2px);
+}
+
+.spinner-border-sm {
+  width: 1rem;
+  height: 1rem;
+}
+
+.drag-drop-zone {
+  width: 100%;
+  max-width: 500px;
+  min-height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 1.5rem;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.drag-drop-zone:hover {
+  background-color: #f8fbff;
+  transform: translateY(-2px);
+}
+
+.drag-drop-zone.drag-over {
+  background-color: #e8f4fd;
+  border-color: #155080 !important;
+}
+
+.drag-drop-zone.uploading {
+  cursor: wait;
+  opacity: 0.85;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .display-4 {
+    font-size: 2rem;
+  }
+  
+  .btn {
+    padding: 0.5rem 1.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .card-body {
+    padding: 2rem !important;
+  }
+  
+  .modal-body {
+    padding: 1.5rem;
+  }
+} 

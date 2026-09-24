@@ -1,0 +1,37 @@
+NovaPartage
+Partagez des données, pas vos fichiers.
+
+Avertissement de suppression
+
+---
+
+Bonjour,
+
+Votre partage {{shareName}} est inactif depuis plus de {{monthsInactive}} mois et sera automatiquement supprimé dans {{daysRemaining}} jour{{daysRemainingPlural}}.
+
+Suppression programmée
+=====================
+Nom du partage: {{shareName}}
+Date de création: {{createdAtFormatted}}
+Dernière modification: {{updatedAtFormatted}}
+Date de suppression: {{deletionDateFormatted}}
+
+⚠️ Important: Après la suppression, toutes les données associées à ce partage seront définitivement supprimées :
+- Le fichier Excel
+- Les données de formulaires
+- Les liens d'accès
+- L'historique du partage
+
+Gérer mes partages :
+{{manageSharesUrl}}
+
+💡 Astuce: Si vous souhaitez conserver ce partage, vous pouvez le réactiver en y accédant depuis votre espace de gestion.
+
+Si vous avez des questions, vous pouvez nous contacter à privacy@novadesic.com.
+
+---
+Cet email a été envoyé automatiquement par NovaPartage
+Si vous n'avez pas demandé cet email, vous pouvez l'ignorer.
+
+https://novapartage.fr
+

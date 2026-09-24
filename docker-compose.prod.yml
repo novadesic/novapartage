@@ -1,0 +1,181 @@
+services:
+  # Service d'authentification personnalisé (Production)
+  auth-service:
+    image: node:18-alpine
+    container_name: novapartage-auth-prod
+    working_dir: /app
+    command: sh -c "npm install --production && npm start"
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./auth-service:/app
+    environment:
+      # Configuration de base (Production)
+      - NODE_ENV=production
+      - PORT=${AUTH_PORT:-3001}
+      - LOG_LEVEL=${LOG_LEVEL:-warn}
+      
+      # Configuration JWT (Production)
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-1h}
+      - JWT_ALGORITHM=${JWT_ALGORITHM:-HS256}
+      - JWT_ISSUER=${JWT_ISSUER:-novapartage-auth}
+      - JWT_AUDIENCE=${JWT_AUDIENCE:-novapartage-frontend}
+      
+      # Configuration Redis (Production)
+      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_DB=${REDIS_DB:-0}
+      - REDIS_ENABLED=true
+      
+      # Configuration CSRF (Production)
+      - CSRF_SECRET=${CSRF_SECRET}
+      
+      # Configuration Sécurité (Production)
+      - SECURITY_HEADERS_ENABLED=true
+      - RATE_LIMIT_ENABLED=true
+      - CSP_ENABLED=true
+      - HSTS_ENABLED=true
+      
+      # Configuration CORS (Production)
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+      
+      # Configuration URLs (Production)
+      - FRONTEND_URL=${FRONTEND_URL}
+      - AUTH_CALLBACK_URL=${AUTH_CALLBACK_URL}
+      
+      # Configuration SMTP (Production)
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_SECURE=${SMTP_SECURE:-true}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - SMTP_FROM=${SMTP_FROM}
+      
+      # Configuration Email (Production)
+      - EMAIL_SUBJECT=${EMAIL_SUBJECT:-Lien de connexion NovaPartage}
+      
+      # Configuration Rate Limiting (Production)
+      - RATE_LIMIT_WINDOW_MS=${RATE_LIMIT_WINDOW_MS:-900000}
+      - RATE_LIMIT_MAX_REQUESTS=${RATE_LIMIT_MAX_REQUESTS:-100}
+      - AUTH_RATE_LIMIT_WINDOW_MS=${AUTH_RATE_LIMIT_WINDOW_MS:-900000}
+      - AUTH_RATE_LIMIT_MAX_REQUESTS=${AUTH_RATE_LIMIT_MAX_REQUESTS:-5}
+      - TOKEN_RATE_LIMIT_WINDOW_MS=${TOKEN_RATE_LIMIT_WINDOW_MS:-900000}
+      - TOKEN_RATE_LIMIT_MAX_REQUESTS=${TOKEN_RATE_LIMIT_MAX_REQUESTS:-300}
+      - EMAIL_RATE_LIMIT_WINDOW_MS=${EMAIL_RATE_LIMIT_WINDOW_MS:-3600000}
+      - EMAIL_RATE_LIMIT_MAX_REQUESTS=${EMAIL_RATE_LIMIT_MAX_REQUESTS:-10}
+      
+      # Configuration Cookies (Production)
+      - COOKIE_SECURE=true
+      - COOKIE_SAME_SITE=strict
+      - COOKIE_DOMAIN=${COOKIE_DOMAIN}
+      - COOKIE_HTTP_ONLY=true
+      - COOKIE_MAX_AGE=${COOKIE_MAX_AGE:-3600000}
+      
+      # Configuration Stockage (Production)
+      - TOKEN_STORAGE_METHOD=cookies
+      - JWT_VALIDATION_MODE=server
+    depends_on:
+      - redis
+    networks:
+      - novapartage-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Redis pour le stockage des tokens et sessions (Production)
+  redis:
+    image: redis:7-alpine
+    container_name: novapartage-redis-prod
+    command: redis-server --requirepass ${REDIS_PASSWORD} --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - novapartage-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Base de données PostgreSQL pour l'authentification (Production)
+  postgres:
+    image: postgres:15
+    container_name: novapartage-postgres-prod
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-novapartage_auth}
+      POSTGRES_USER: ${POSTGRES_USER:-novapartage}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - novapartage-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-novapartage}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Base de données MongoDB pour les partages (Production)
+  mongodb:
+    image: mongo:7.0
+    container_name: novapartage-mongodb-prod
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_DATABASE:-novapartage}
+    volumes:
+      - mongodb_data:/data/db
+      - ./mongodb/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - novapartage-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Nginx Reverse Proxy (Production)
+  nginx:
+    image: nginx:alpine
+    container_name: novapartage-nginx-prod
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.prod.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./nginx/frontend-fallback.html:/etc/nginx/frontend-fallback.html:ro
+      - ./nginx/logo.png:/etc/nginx/logo.png:ro
+      - ./nginx/background.jpg:/etc/nginx/background.jpg:ro
+    depends_on:
+      - auth-service
+    networks:
+      - novapartage-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  postgres_data:
+  mongodb_data:
+  redis_data:
+
+networks:
+  novapartage-network:
+    driver: bridge

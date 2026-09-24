@@ -1,0 +1,50 @@
+#!/bin/bash
+
+echo "🔍 Test de Diagnostic du Mapping des Cellules Éditables"
+echo "========================================================"
+echo ""
+
+# Vérifier que le backend compile
+echo "🔍 Vérification de la compilation..."
+if ./mvnw compile > /dev/null 2>&1; then
+    echo "✅ Backend compilé avec succès"
+else
+    echo "❌ Erreur de compilation du backend"
+    echo "Exécutez './mvnw compile' pour voir les détails"
+    exit 1
+fi
+
+echo ""
+echo "🚀 Backend prêt pour le diagnostic !"
+echo ""
+echo "📋 Instructions de diagnostic :"
+echo "1. Démarrer le backend : ./mvnw quarkus:dev"
+echo "2. Créer un nouveau partage en excluant la première colonne"
+echo "3. Accéder au formulaire partagé via le lien généré"
+echo "4. Vérifier les logs de débogage dans le backend"
+echo ""
+echo "🔍 Logs de débogage à surveiller :"
+echo ""
+echo "📊 Dans ExcelDataConverter :"
+echo "   - '📊 Ordre des colonnes sélectionnées: [1, 2, 3]'"
+echo "   - '📊 Headers disponibles: [column-0, column-1, column-2, column-3]'"
+echo "   - '📋 Ligne X traitée: 3 colonnes avec sélection, ordre: [column-1, column-2, column-3]'"
+echo ""
+echo "🔍 Dans ShareService :"
+echo "   - '🔍 Structure du tableData filtré - première ligne: {column-1, column-2, column-3, _rowIndex}'"
+echo "   - '🔍 Ordre des colonnes dans le tableData: [column-1, column-2, column-3]'"
+echo "   - '🔍 Mapping des colonnes filtrées: {column-1=0, column-2=1, column-3=2}'"
+echo "   - '🔍 Cellule éditable mappée: [X,Y] -> [X,Z]'"
+echo "   - '🔍 Vérification - Colonne column-X (index Y) contient: Z'"
+echo ""
+echo "🎯 Problème à identifier :"
+echo "   - Les cellules éditables sont sur la colonne 'Tarif' (visuellement)"
+echo "   - Mais tableDataEditableCells indique col: 1 (colonne 'Nom du produit')"
+echo "   - Il devrait indiquer col: 2 (colonne 'Tarif')"
+echo "   - ⚠️ RENOMMAGE EFFECTUÉ : editableCells → tableDataEditableCells pour clarifier"
+echo ""
+echo "🔧 Pour démarrer le backend :"
+echo "   cd /home/msoriano/DDS/git/datadesic/ddsshare/backend"
+echo "   ./mvnw quarkus:dev"
+echo ""
+echo "📝 Documentation complète : test_correction_columns_backend.md"

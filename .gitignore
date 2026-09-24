@@ -1,0 +1,78 @@
+# NovaPartage — données utilisateurs
+user_files/
+users_files/
+/users_files/
+
+# Secrets et configuration locale
+.env
+.env.*
+*.env
+env.local
+application-local.properties
+application-dev.properties
+application-logto.properties
+application-mongodb.properties
+config.env
+
+# Infra interne (ne doit pas être versionnée)
+MEP/
+
+# Artefacts build
+node_modules/
+target/
+dist/
+build/
+.angular/
+**/.mvn/*
+!**/.mvn/wrapper/
+!**/.mvn/wrapper/*
+**/*-runner
+
+# Docker / runtime
+postgres_data/
+mongodb_data/
+volumes/
+reports/
+keycloak-data/
+keycloak-config/
+
+# Logs et temporaires
+*.log
+logs/
+*.tmp
+*.temp
+temp/
+**/tmp/
+**/temp/
+quarkus.log
+
+# Backups
+*.bak
+*.backup
+sav/
+tmp/
+
+# IDE / OS
+.vscode/
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Données sensibles locales
+user_files/
+
+# Documents légaux internes (hors dépôt public OSS)
+docs/legal/*.pdf
+docs/legal/ATTESTATION-PI*.md
+docs/legal/ATTESTATION-PI-NOTES*.md
+docs/legal/CESSION*.md
+docs/legal/ENGAGEMENT*.md
+docs/legal/attestation-print.css
+
+# Artefacts marketing / annonces (hors dépôt OSS)
+annonce-linkedin*.html
+annonce-*.html
+
+# Carnets de migration internes (ne pas republier)
+docs/oss-migration/

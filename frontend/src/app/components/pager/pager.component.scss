@@ -1,0 +1,215 @@
+// Pager compact (pour le haut du tableau)
+.pager-compact {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  
+  .pager-info {
+    font-size: 0.85rem;
+    color: #6c757d;
+    font-weight: 500;
+  }
+  
+  .pager-nav {
+    .btn-group {
+      .btn {
+        border-radius: 4px;
+        font-size: 0.8rem;
+        padding: 4px 8px;
+        min-width: 36px;
+        transition: all 0.2s ease;
+        
+        &:not(.disabled):not(:disabled) {
+          &:hover {
+            background-color: #e9ecef;
+            border-color: #adb5bd;
+            color: #495057;
+          }
+          
+          &:focus {
+            box-shadow: 0 0 0 0.2rem rgba(32, 113, 170, 0.25);
+          }
+        }
+        
+        &.btn-primary.disabled {
+          background-color: #2071aa;
+          border-color: #2071aa;
+          color: #fff;
+          opacity: 1;
+          cursor: default;
+        }
+        
+        &.btn-outline-secondary:disabled {
+          color: #6c757d;
+          background-color: #fff;
+          border-color: #dee2e6;
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+        
+        i {
+          font-size: 0.75rem;
+        }
+      }
+    }
+  }
+}
+
+// Pager détaillé (pour le bas du tableau)
+.pager-detailed {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-top: 16px;
+  
+  .pager-info {
+    font-size: 0.9rem;
+    color: #6c757d;
+    font-weight: 500;
+  }
+  
+  .pager-nav {
+    .pagination {
+      margin-bottom: 0;
+      
+      .page-item {
+        margin: 0 2px;
+        
+        .page-link {
+          border: 1px solid #dee2e6;
+          color: #495057;
+          background-color: #fff;
+          padding: 6px 12px;
+          font-size: 0.875rem;
+          border-radius: 4px;
+          transition: all 0.2s ease;
+          min-width: 40px;
+          text-align: center;
+          
+          &:hover {
+            background-color: #e9ecef;
+            border-color: #adb5bd;
+            color: #495057;
+          }
+          
+          &:focus {
+            box-shadow: 0 0 0 0.2rem rgba(32, 113, 170, 0.25);
+            outline: none;
+          }
+        }
+        
+        &.active .page-link {
+          background-color: #2071aa;
+          border-color: #2071aa;
+          color: #fff;
+          
+          &:hover {
+            background-color: #1a5d8a;
+            border-color: #1a5d8a;
+          }
+        }
+        
+        &.disabled .page-link {
+          color: #6c757d;
+          background-color: #fff;
+          border-color: #dee2e6;
+          cursor: not-allowed;
+          opacity: 0.6;
+          
+          &:hover {
+            background-color: #fff;
+            border-color: #dee2e6;
+            color: #6c757d;
+          }
+        }
+        
+        i {
+          font-size: 0.8rem;
+        }
+      }
+    }
+  }
+}
+
+// Styles responsives pour mobile
+@media (max-width: 768px) {
+  .pager-compact {
+    padding: 6px 8px;
+    
+    .d-flex {
+      flex-direction: column;
+      gap: 8px;
+      align-items: center !important;
+    }
+    
+    .pager-info {
+      text-align: center;
+      font-size: 0.8rem;
+    }
+    
+    .pager-nav .btn-group .btn {
+      padding: 3px 6px;
+      font-size: 0.75rem;
+      min-width: 32px;
+    }
+  }
+  
+  .pager-detailed {
+    padding: 8px 12px;
+    
+    .d-flex {
+      flex-direction: column;
+      gap: 12px;
+      align-items: center !important;
+    }
+    
+    .pager-info {
+      text-align: center;
+      font-size: 0.85rem;
+    }
+    
+    .pager-nav .pagination .page-item {
+      margin: 0 1px;
+      
+      .page-link {
+        padding: 4px 8px;
+        font-size: 0.8rem;
+        min-width: 32px;
+      }
+    }
+  }
+}
+
+// Styles pour les très petits écrans
+@media (max-width: 480px) {
+  .pager-compact {
+    padding: 4px 6px;
+    
+    .pager-info {
+      font-size: 0.75rem;
+    }
+    
+    .pager-nav .btn-group .btn {
+      padding: 2px 4px;
+      font-size: 0.7rem;
+      min-width: 28px;
+    }
+  }
+  
+  .pager-detailed {
+    padding: 6px 8px;
+    
+    .pager-info {
+      font-size: 0.8rem;
+    }
+    
+    .pager-nav .pagination .page-item .page-link {
+      padding: 3px 6px;
+      font-size: 0.75rem;
+      min-width: 28px;
+    }
+  }
+}

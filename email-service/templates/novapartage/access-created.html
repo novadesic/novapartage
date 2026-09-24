@@ -1,0 +1,67 @@
+<h2 style="color: #212529; margin-top: 0; margin-bottom: 20px; font-size: 28px; font-weight: 600;">Bonjour,</h2>
+
+<p style="color: #495057; line-height: 1.6; font-size: 16px; margin-bottom: 25px;">
+    <strong style="color: #2071aa;">{{ownerEmail}}</strong> vous a donné accès à un partage de données via <a href="https://novapartage.fr" style="color: #2071aa; text-decoration: none;">NovaPartage</a>.
+</p>
+
+<!-- Carte d'information du partage -->
+<div style="background-color: #2071aa; background: linear-gradient(135deg, #2071aa 0%, #1a5d8a 100%); color: white; padding: 25px; border-radius: 10px; margin: 25px 0; box-shadow: 0 4px 15px rgba(32, 113, 170, 0.2);">
+    <h3 style="color: #ffffff; margin-top: 0; margin-bottom: 15px; font-size: 24px; font-weight: 600;">📊 Partage de données</h3>
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+        <tr>
+            <td style="padding: 8px 0; color: rgba(255, 255, 255, 0.95); font-size: 15px;">
+                <strong style="color: #ffffff;">Nom du partage:</strong> {{formName}}
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 8px 0; color: rgba(255, 255, 255, 0.95); font-size: 15px;">
+                <strong style="color: #ffffff;">Partagé par:</strong> {{ownerEmail}}
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 8px 0; color: rgba(255, 255, 255, 0.95); font-size: 15px;">
+                <strong style="color: #ffffff;">Valide pendant:</strong> {{validityDays}} jour{{validityDaysPlural}}
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 8px 0; color: rgba(255, 255, 255, 0.95); font-size: 15px;">
+                <strong style="color: #ffffff;">Expire le:</strong> {{expiresAtFormatted}}
+            </td>
+        </tr>
+    </table>
+</div>
+
+<!-- Bouton d'action -->
+<div style="text-align: center; margin: 35px 0;">
+    <a href="{{accessUrl}}" 
+       style="background-color: #2071aa; background: linear-gradient(135deg, #2071aa 0%, #1a5d8a 100%); 
+              color: white; 
+              padding: 15px 35px; 
+              text-decoration: none; 
+              border-radius: 25px; 
+              display: inline-block; 
+              font-weight: 500;
+              font-size: 16px;
+              box-shadow: 0 4px 15px rgba(32, 113, 170, 0.3);
+              transition: all 0.3s ease;">
+        🔗 Accéder au partage
+    </a>
+</div>
+
+<p style="color: #999; font-size: 12px; line-height: 1.5; margin: 15px 0; text-align: center;">
+    ou copier le lien suivant dans un navigateur :
+</p>
+<p style="word-break: break-all; color: #666; background: #f8f9fa; padding: 10px; border-radius: 5px; font-family: monospace; font-size: 11px; margin: 0 0 25px 0;">{{accessUrl}}</p>
+
+<!-- Avertissement -->
+<div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 20px; border-radius: 10px; margin: 25px 0; border-left: 4px solid #ffc107;">
+    <p style="margin: 0; color: #856404; font-size: 14px; line-height: 1.5;">
+        <strong style="color: #856404;">⚠️ Important:</strong> Ce lien est personnel et confidentiel. 
+        Ne le partagez pas avec d'autres personnes.
+    </p>
+</div>
+
+<p style="color: #6c757d; font-size: 15px; line-height: 1.6; margin-top: 25px;">
+    Si vous n'attendiez pas cet email ou si vous avez des questions,
+    vous pouvez contacter directement <strong style="color: #2071aa;">{{ownerEmail}}</strong>.
+</p>

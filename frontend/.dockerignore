@@ -1,0 +1,8 @@
+node_modules/
+dist/
+!dist/ddsshare-app/
+.git/
+.gitignore
+README.md
+*.log
+.angular/ 

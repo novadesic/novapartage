@@ -1,0 +1,455 @@
+<div class="container-fluid py-4">
+
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Chargement...</span>
+    </div>
+    <p class="mt-3 text-muted">Chargement de vos partages...</p>
+  </div>
+
+  <!-- Erreur -->
+  <div *ngIf="error" class="alert alert-danger" role="alert">
+    <i class="bi bi-exclamation-triangle me-2"></i>
+    {{ error }}
+    <button class="btn btn-outline-danger btn-sm ms-3" (click)="loadShares()">
+      <i class="bi bi-arrow-clockwise me-1"></i>
+      Réessayer
+    </button>
+  </div>
+
+  <!-- Contenu principal -->
+  <div *ngIf="!isLoading && !error">
+    
+    <!-- Bandeau d'avertissement : limite de partages atteinte -->
+    <div *ngIf="isShareLimitReached" class="alert alert-warning mx-0 mb-4 d-flex align-items-center" role="alert">
+      <i class="bi bi-exclamation-triangle-fill me-3" style="font-size: 1.5rem;"></i>
+      <div>
+        <strong>Limite de partages atteinte</strong>
+        <p class="mb-0 mt-1">Vous avez atteint la limite de {{ maxActiveShares }} partages actifs ({{ activeSharesCount }} actuellement). Supprimez un partage pour en créer un nouveau.</p>
+      </div>
+    </div>
+
+    <!-- Statistiques rapides -->
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body">
+            <div class="d-flex align-items-center">
+              <div class="flex-shrink-0">
+                <div class="rounded-circle bg-primary p-3">
+                  <i class="bi bi-upload text-white" style="font-size: 1.5rem;"></i>
+                </div>
+              </div>
+              <div class="flex-grow-1 ms-3">
+                <h5 class="card-title mb-1">{{ userShares.length }}</h5>
+                <p class="card-text text-muted">Partages créés </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body">
+            <div class="d-flex align-items-center">
+              <div class="flex-shrink-0">
+                <div class="rounded-circle bg-success p-3">
+                  <i class="bi bi-download text-white" style="font-size: 1.5rem;"></i>
+                </div>
+              </div>
+              <div class="flex-grow-1 ms-3">
+                <h5 class="card-title mb-1">{{ userAccessTokens.length }}</h5>
+                <p class="card-text text-muted">Partages reçus</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mes partages créés -->
+    <div class="row mb-5">
+      <div class="col-12">
+        <h4 class="mb-3 d-flex justify-content-between">
+          <span class="h4">
+            <i class="bi bi-folder-plus me-2"></i>
+            Mes partages créés 
+          </span>
+         
+          <span class="">
+            <a *ngIf="canCreateShare" routerLink="/share/new" class="btn btn-primary" title="Créer un partage" style="top:-6px;position: relative;">
+              <i class="bi bi-plus-circle me-2"></i>
+              <span class="d-none d-md-inline">Nouveau partage</span>
+            </a>
+            <span *ngIf="!canCreateShare" class="btn btn-secondary disabled" [title]="isShareLimitReached ? 'Limite de ' + activeSharesCount + '/' + maxActiveShares + ' partages actifs atteinte' : 'Mode consultation : création désactivée'" style="top:-6px;position: relative;">
+              <i class="bi bi-plus-circle me-2"></i>
+              <span class="d-none d-md-inline">Nouveau partage</span>
+            </span>
+          </span>
+        </h4>
+        
+        <div *ngIf="userShares.length === 0" class="card border-0 ">
+          <div class="card-body text-center py-5">
+            <i class="bi bi-folder2-open text-muted" style="font-size: 3rem;"></i>
+            <h5 class="mt-3 text-muted">Aucun partage créé</h5>
+            <p class="text-muted">Commencez par créer votre premier partage !</p>
+            <a *ngIf="canCreateShare" routerLink="/share/new" class="btn btn-primary">
+              <i class="bi bi-plus-circle me-2"></i>
+              Créer un partage
+            </a>
+            <span *ngIf="!canCreateShare" class="btn btn-secondary disabled" [title]="isShareLimitReached ? 'Limite de ' + maxActiveShares + ' partages actifs atteinte' : 'Mode consultation'">
+              <i class="bi bi-plus-circle me-2"></i>
+              Créer un partage
+            </span>
+          </div>
+        </div>
+
+        <div *ngIf="userShares.length > 0" class="card border-0 shadow-sm">
+          <div class="card-body">
+            <!-- Filtres pour les partages -->
+            <div class="row mb-3">
+              <div class="col-12">
+                <div class="d-flex flex-wrap gap-2 align-items-center justify-content-between">
+                  <div class="d-flex flex-wrap gap-2 align-items-center">
+                    <span class="text-muted me-2">Filtres :</span>
+                    <div class="form-check form-check-inline">
+                      <input class="form-check-input" type="checkbox" id="showInactiveShares" 
+                             [checked]="showInactiveShares" (change)="toggleInactiveShares()">
+                      <label class="form-check-label" for="showInactiveShares">
+                        Partages inactifs
+                      </label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                      <input class="form-check-input" type="checkbox" id="showDeletedShares" 
+                             [checked]="showDeletedShares" (change)="toggleDeletedShares()">
+                      <label class="form-check-label" for="showDeletedShares">
+                        Partages supprimés
+                      </label>
+                    </div>
+                  </div>
+                  <small class="text-muted">
+                    {{ sortedUserShares.length }} sur {{ userShares.length }} partages
+                  </small>
+                </div>
+              </div>
+            </div>
+            <!-- Version desktop : tableau -->
+            <div class="table-responsive d-none d-lg-block">
+              <table class="table table-hover ">
+                <thead>
+                  <tr>
+                    <th (click)="sortShares('fileName')" class="cursor-pointer">
+                      <i class="bi bi-file-earmark-excel me-1"></i>
+                      Fichier
+                      <i *ngIf="sortField === 'fileName'" [class]="getSortIcon()"></i>
+                    </th>
+                    <th (click)="sortShares('createdAt')" class="cursor-pointer">
+                      <i class="bi bi-calendar me-1"></i>
+                      Date de création
+                      <i *ngIf="sortField === 'createdAt'" [class]="getSortIcon()"></i>
+                    </th>
+                    <th (click)="sortShares('recipients')" class="cursor-pointer">
+                      <i class="bi bi-people me-1"></i>
+                      Destinataires
+                      <i *ngIf="sortField === 'recipients'" [class]="getSortIcon()"></i>
+                    </th>
+                    <th (click)="sortShares('access')" class="cursor-pointer">
+                      <i class="bi bi-link-45deg me-1"></i>
+                      Liens générés
+                      <i *ngIf="sortField === 'access'" [class]="getSortIcon()"></i>
+                    </th>
+                    <th>
+                      <i class="bi bi-check-circle me-1"></i>
+                      Liens actifs
+                    </th>
+                    <th>
+                      <i class="bi bi-x-circle me-1"></i>
+                      Liens terminés
+                    </th>
+                    <th (click)="sortShares('status')" class="cursor-pointer">
+                      <i class="bi bi-info-circle me-1"></i>
+                      Statut
+                      <i *ngIf="sortField === 'status'" [class]="getSortIcon()"></i>
+                    </th>
+                    <th>
+                      <i class="bi bi-gear me-1"></i>
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody >
+                  <tr *ngFor="let share of sortedUserShares" 
+                      [class]="share.status === 'DELETED' ? 'table-muted' : (share.status === 'INACTIVE' ? 'table-inactive' : '')">
+                    <td>
+                      <strong>
+                        <a [routerLink]="['/share', share.id]" class="text-decoration-none" 
+                           [class]="share.status === 'DELETED' ? 'text-muted' : ''">
+                          {{ share.originalFileName || share.fileName }}
+                        </a>
+                      </strong>
+                    </td>
+                    <td>
+                      <small class="text-muted">{{ formatDate(share.createdAt) }}</small>
+                    </td>
+                    <td>
+                      <span class="badge bg-info">{{ getRecipientsCount(share) }}</span>
+                    </td>
+                    <td>
+                      <span class="badge bg-primary">{{ getTotalAccessCount(share) }}</span>
+                    </td>
+                    <td>
+                      <span class="badge bg-success">{{ share.activeTokensCount || 0 }}</span>
+                    </td>
+                    <td>
+                      <span class="badge bg-secondary">{{ share.expiredTokensCount || 0 }}</span>
+                    </td>
+                    <td>
+                      <span [class]="getStatusBadgeClass(share.status)" class="badge">
+                        {{ getStatusLabel(share.status) }}
+                      </span>
+                    </td>
+                    <td>
+                      <div class="btn-group" role="group">
+                        <a [routerLink]="['/share', share.id]" class="btn btn-outline-primary btn-sm" title="Voir">
+                          <i class="bi bi-eye"></i>
+                        </a>
+                        <button *ngIf="share.status !== 'DELETED'" class="btn btn-outline-danger btn-sm" 
+                                (click)="onDeleteShare(share.id)" title="Supprimer">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Version mobile : cartes -->
+            <div class="d-lg-none">
+              <div *ngFor="let share of sortedUserShares" class="card mb-3 border-0 shadow-sm" 
+                   [class]="share.status === 'DELETED' ? 'opacity-50' : (share.status === 'INACTIVE' ? 'opacity-75' : '')">
+                <div class="card-body">
+                  <!-- En-tête de la carte -->
+                  <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="flex-grow-1">
+                      <h6 class="card-title mb-1">
+                        <a [routerLink]="['/share', share.id]" class="text-decoration-none" 
+                           [class]="share.status === 'DELETED' ? 'text-muted' : ''">
+                          <i class="bi bi-file-earmark-excel me-2"></i>
+                          {{ share.originalFileName || share.fileName }}
+                        </a>
+                      </h6>
+                      <small class="text-muted">
+                        <i class="bi bi-calendar me-1"></i>
+                        {{ formatDate(share.createdAt) }}
+                      </small>
+                    </div>
+                    <div class="btn-group" role="group">
+                      <a [routerLink]="['/share', share.id]" class="btn btn-outline-primary btn-sm" title="Voir">
+                        <i class="bi bi-eye"></i>
+                      </a>
+                      <button *ngIf="share.status !== 'DELETED'" class="btn btn-outline-danger btn-sm" 
+                              (click)="onDeleteShare(share.id)" title="Supprimer">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Statistiques en badges -->
+                  <div class="row g-2 mb-3">
+                    <div class="col-6">
+                      <div class="d-flex align-items-center">
+                        <span class="badge bg-info me-2">{{ getRecipientsCount(share) }}</span>
+                        <small class="text-muted">Destinataires</small>
+                      </div>
+                    </div>
+                    <div class="col-6">
+                      <div class="d-flex align-items-center">
+                        <span class="badge bg-primary me-2">{{ getTotalAccessCount(share) }}</span>
+                        <small class="text-muted">Liens générés</small>
+                      </div>
+                    </div>
+                    <div class="col-6">
+                      <div class="d-flex align-items-center">
+                        <span class="badge bg-success me-2">{{ share.activeTokensCount || 0 }}</span>
+                        <small class="text-muted">Liens actifs</small>
+                      </div>
+                    </div>
+                    <div class="col-6">
+                      <div class="d-flex align-items-center">
+                        <span class="badge bg-secondary me-2">{{ share.expiredTokensCount || 0 }}</span>
+                        <small class="text-muted">Liens terminés</small>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Statut -->
+                  <div class="d-flex justify-content-between align-items-center">
+                    <span [class]="getStatusBadgeClass(share.status)" class="badge">
+                      <i class="bi bi-info-circle me-1"></i>
+                      {{ getStatusLabel(share.status) }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Partages reçus -->
+    <div class="row">
+      <div class="col-12">
+        <h4 class="mb-3">
+          <i class="bi bi-inbox me-2"></i>
+          Partages reçus
+        </h4>
+        
+        <div *ngIf="userAccessTokens.length === 0" class="card border-0 ">
+          <div class="card-body text-center py-5">
+            <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+            <h5 class="mt-3 text-muted">Aucun partage reçu</h5>
+            <p class="text-muted">Vous n'avez pas encore reçu de partages de formulaires.</p>
+          </div>
+        </div>
+
+        <div *ngIf="userAccessTokens.length > 0" class="card border-0 shadow-sm">
+          <div class="card-body">
+            <!-- Filtres pour les partages reçus -->
+            <div class="row mb-3">
+              <div class="col-12">
+                <div class="d-flex flex-wrap gap-2 align-items-center justify-content-between">
+                  <div class="d-flex flex-wrap gap-2 align-items-center">
+                    <span class="text-muted me-2">Filtres :</span>
+                    <div class="form-check form-check-inline">
+                      <input class="form-check-input" type="checkbox" id="showActiveAccess" 
+                             [checked]="showActiveAccess" (change)="toggleActiveAccess()">
+                      <label class="form-check-label" for="showActiveAccess">
+                        Actifs
+                      </label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                      <input class="form-check-input" type="checkbox" id="showValidatedAccess" 
+                             [checked]="showValidatedAccess" (change)="toggleValidatedAccess()">
+                      <label class="form-check-label" for="showValidatedAccess">
+                        Validés
+                      </label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                      <input class="form-check-input" type="checkbox" id="showTerminatedAccess" 
+                             [checked]="showTerminatedAccess" (change)="toggleTerminatedAccess()">
+                      <label class="form-check-label" for="showTerminatedAccess">
+                        Terminés
+                      </label>
+                    </div>
+                  </div>
+                  <small class="text-muted">
+                    {{ sortedUserAccessTokens.length }} sur {{ userAccessTokens.length }} partages
+                  </small>
+                </div>
+              </div>
+            </div>
+            <!-- Version desktop : tableau -->
+            <div class="table-responsive d-none d-lg-block">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th (click)="sortAccessTokens('pageTitle')" class="cursor-pointer">
+                      Titre
+                      <i *ngIf="accessSortField === 'pageTitle'" [class]="getAccessSortIcon()"></i>
+                    </th>
+                    <th class="text-center">Description</th>
+                    <th (click)="sortAccessTokens('ownerUsername')" class="cursor-pointer">
+                      Créateur
+                      <i *ngIf="accessSortField === 'ownerUsername'" [class]="getAccessSortIcon()"></i>
+                    </th>
+                    <th (click)="sortAccessTokens('expiresAt')" class="cursor-pointer">
+                      Statut
+                      <i *ngIf="accessSortField === 'expiresAt'" [class]="getAccessSortIcon()"></i>
+                    </th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let token of sortedUserAccessTokens">
+                    <td>
+                      <strong>{{ token.pageTitle || 'Formulaire de saisie' }}</strong>
+                    </td>
+                    <td class="text-muted text-center">
+                      <small  [innerHTML]="token.pageDescription"></small>
+                    </td>
+                    <td>
+                      <small class="text-muted">{{ token.ownerUsername || token.ownerEmail }}</small>
+                    </td>
+                    <td>
+                      <span [class]="getTokenStatusClass(token)" class="badge">
+                        {{ getTokenStatusWithTime(token) }}
+                      </span>
+                    </td>
+                    <td>
+                      <a *ngIf="canOpenToken(token)" [href]="token.accessUrl" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-eye me-1"></i>
+                        Accéder
+                      </a>
+                      <span *ngIf="!canOpenToken(token)" class="btn btn-outline-secondary btn-sm disabled">
+                        <i class="bi bi-x-circle me-1"></i>
+                        {{ getTokenStatusLabel(token) }}
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Version mobile : cartes -->
+            <div class="d-lg-none">
+              <div *ngFor="let token of sortedUserAccessTokens" class="card mb-3 border-0 shadow-sm">
+                <div class="card-body">
+                  <!-- En-tête de la carte -->
+                  <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="flex-grow-1">
+                      <h6 class="card-title mb-1">
+                        <i class="bi bi-file-earmark-text me-2"></i>
+                        {{ token.pageTitle || 'Formulaire de saisie' }}
+                      </h6>
+                      <small class="text-muted">
+                        <i class="bi bi-person me-1"></i>
+                        {{ token.ownerUsername || token.ownerEmail }}
+                      </small>
+                    </div>
+                    <div>
+                      <a *ngIf="canOpenToken(token)" [href]="token.accessUrl" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-eye me-1"></i>
+                        Accéder
+                      </a>
+                      <span *ngIf="!canOpenToken(token)" class="btn btn-outline-secondary btn-sm disabled">
+                        <i class="bi bi-x-circle me-1"></i>
+                        {{ getTokenStatusLabel(token) }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Description -->
+                  <div class="mb-3" *ngIf="token.pageDescription">
+                    <small class="text-muted" [innerHTML]="token.pageDescription"></small>
+                  </div>
+
+                  <!-- Statut -->
+                  <div class="d-flex justify-content-between align-items-center">
+                    <span [class]="getTokenStatusClass(token)" class="badge">
+                      {{ getTokenStatusWithTime(token) }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div> 

@@ -1,0 +1,18 @@
+{
+  "success": true,
+  "shareId": "share-123",
+  "shareUrl": "https://exemple.com/share/share-123",
+  "recipients": [
+    {
+      "email": "test@exemple.com",
+      "name": "Test User",
+      "formUrl": "https://exemple.com/form/form-123"
+    }
+  ],
+  "status": "ACTIVE",
+  "createdAt": "2024-01-15T10:30:00Z",
+  "message": "Partage créé avec succès"
+}
+
+
+

@@ -1,0 +1,113 @@
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="mb-0">
+            <i class="bi bi-plus-circle me-2"></i>Nouveau partage
+          </h3>
+        </div>
+        <div class="card-body">
+          <div *ngIf="userProfile" class="mb-4">
+            <div class="alert alert-info">
+              <i class="bi bi-person-circle me-2"></i>
+              Connecté en tant que : <strong>{{ userProfile.firstName }} {{ userProfile.lastName }}</strong>
+              <span class="badge bg-primary ms-2">{{ userProfile.email }}</span>
+            </div>
+          </div>
+
+          <form (ngSubmit)="onSubmit()" #shareForm="ngForm">
+            <div class="mb-3">
+              <label for="title" class="form-label">Titre du partage</label>
+              <input 
+                type="text" 
+                class="form-control" 
+                id="title" 
+                name="title"
+                [(ngModel)]="shareData.title"
+                required
+                placeholder="ex: Mon formulaire de commande">
+            </div>
+
+            <div class="mb-3">
+              <label for="description" class="form-label">Description</label>
+              <textarea 
+                class="form-control" 
+                id="description" 
+                name="description"
+                [(ngModel)]="shareData.description"
+                rows="3"
+                placeholder="ex: Formulaire pour collecter les informations clients"></textarea>
+            </div>
+
+            <div class="mb-3">
+              <label for="file" class="form-label">Fichier à partager</label>
+              <input 
+                type="file" 
+                class="form-control" 
+                id="file" 
+                name="file"
+                (change)="onFileSelected($event)"
+                required>
+              <div class="form-text">Formats supportés : PDF, DOC, XLS, TXT, etc.</div>
+            </div>
+
+            <div class="mb-3">
+              <label for="access" class="form-label">Niveau d'accès</label>
+              <select 
+                class="form-select" 
+                id="access" 
+                name="access"
+                [(ngModel)]="shareData.access">
+                <option value="public">Public (accessible à tous)</option>
+                <option value="private">Privé (invitation requise)</option>
+                <option value="restricted">Restreint (mots de passe requis)</option>
+              </select>
+            </div>
+
+            <div class="mb-3" *ngIf="shareData.access === 'restricted'">
+              <label for="password" class="form-label">Mot de passe</label>
+              <div class="input-group">
+                <input 
+                  [type]="showShareFormPassword ? 'text' : 'password'" 
+                  class="form-control" 
+                  id="password" 
+                  name="password"
+                  [(ngModel)]="shareData.password"
+                  placeholder="ex: motdepasse123">
+                <button class="btn btn-outline-secondary" type="button" (click)="showShareFormPassword = !showShareFormPassword" tabindex="-1">
+                  <i class="bi" [ngClass]="showShareFormPassword ? 'bi-eye-slash' : 'bi-eye'"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="expiry" class="form-label">Date d'expiration</label>
+              <input 
+                type="date" 
+                class="form-control" 
+                id="expiry" 
+                name="expiry"
+                [(ngModel)]="shareData.expiry">
+              <div class="form-text">Laissez vide pour un partage permanent</div>
+            </div>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+              <button type="button" class="btn btn-secondary me-md-2" routerLink="/">
+                <i class="bi bi-arrow-left me-2"></i>Annuler
+              </button>
+              <button 
+                type="submit" 
+                class="btn btn-primary"
+                [disabled]="!shareForm.valid || isSubmitting">
+                <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2"></span>
+                <i *ngIf="!isSubmitting" class="bi bi-share me-2"></i>
+                {{ isSubmitting ? 'Création...' : 'Créer le partage' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

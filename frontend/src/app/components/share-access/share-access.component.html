@@ -1,0 +1,233 @@
+<div class="vh-100 d-flex flex-column">
+  <!-- Navbar globale -->
+  <app-navbar pageTitle="Partage de données"></app-navbar>
+
+  <!-- Contenu principal -->
+  <main class="flex-grow-1">
+    <div class="container-fluid py-4">
+      
+      <!-- Loading -->
+      <div *ngIf="isLoading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Chargement...</span>
+        </div>
+        <p class="mt-3 text-muted">Chargement du formulaire...</p>
+      </div>
+
+      <!-- Erreur -->
+      <div *ngIf="error" class="text-center py-5">
+        <div class="alert alert-danger mx-auto" style="max-width: 600px;">
+          <i class="bi bi-exclamation-triangle me-2"></i>
+          {{ error }}
+        </div>
+      </div>
+
+      <!-- Contenu principal -->
+      <div *ngIf="!isLoading && !error && formData" class="row">
+        
+        <!-- Formulaire -->
+        <div class="col-lg-8">
+          <div class="card border-0 shadow-sm mb-4">
+            
+            <div class="card-body p-xs-0">
+             
+              <!-- Formulaire -->
+              <div class="mb-4">
+                <app-form-preview
+                  [token]="token"
+                  [columnLabels]="columnLabelsForFormPreview"
+                  [pageTitle]="pageTitle"
+                  [pageDescription]="pageDescription"
+                  [recipientEmail]="formData.recipientEmail"
+                  [editableCells]="editableCellsForFormPreview"
+                  [originalValues]="originalValues"
+                  [allowTitleEdit]="false"
+                  [readOnly]="isTokenValidated"
+                  [totalRecipients]="1"
+                  (formValuesChange)="formValues = $event"
+                  (cellModifiedChange)="onCellModified($event)">
+                </app-form-preview>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="col-lg-4">
+          <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+              <h5 class="mb-0">
+                <i class="bi bi-file-earmark-text me-2"></i>
+                Informations et Actions
+              </h5>
+            </div>
+            <div class="card-body">
+              
+                  <div class="mb-2">
+                    <strong>Partagé par : </strong> <a href="mailto:{{ formData.ownerEmail }}">{{ formData.ownerEmail }}</a>
+                  </div>
+                  <div class="mb-2">
+                    <strong>Partagé le : </strong> {{ formatDate(formData.createdAt) }}
+                  </div>
+                  <div class="mb-2">
+                    <strong>Destinataire : </strong> <a href="mailto:{{ formData.recipientEmail }}">{{ formData.recipientEmail }}</a>
+                  </div>
+                  <div class="mb-2" *ngIf="validatedAt">
+                    <strong>Validé le : </strong> {{ formatDate(validatedAt) }}
+                  </div>
+                  <div class="mb-2" *ngIf="formData?.validatedBy">
+                    <strong>Validé par : </strong> <a href="mailto:{{ formData.validatedBy }}">{{ formData.validatedBy }}</a>
+                  </div>
+              <div class="d-grid gap-2">
+                
+               
+                
+                <!-- Informations sur la validité -->
+                <div class="alert alert-info mt-3" *ngIf="!isTokenValidated">
+                  <h6 class="alert-heading">
+                    <i class="bi bi-clock me-1"></i>
+                    Validité de l'accès
+                  </h6>
+                  <p class="mb-0">{{ getExpiryDate() }}</p>
+                </div>
+                
+                <!-- Message si pas de champs éditables -->
+                <div class="alert alert-info mt-3" *ngIf="!hasEditableFields && !isTokenValidated">
+                  <small>
+                    <i class="bi bi-info-circle me-1"></i>
+                    En validant, un message sera envoyé au créateur du partage pour confirmer que vous avez reçu les données partagées.
+                  </small>
+                </div>
+                
+                <!-- Message si formulaire validé -->
+                <div class="alert alert-success mt-3" *ngIf="isTokenValidated">
+                  <small>
+                    <i class="bi bi-check-circle me-1"></i>
+                    Ce formulaire a été validé et est maintenant en lecture seule.
+                  </small>
+                </div>
+                
+                <!-- Indicateur de modifications -->
+                <div class="alert alert-info mt-3" *ngIf="hasEditableFields && getModifiedCount() > 0">
+                  <h6 class="alert-heading">
+                    <i class="bi bi-pencil-square me-1"></i>
+                    Modifications en attente
+                  </h6>
+                  <p class="mb-0">
+                    <strong>{{ getModifiedCount() }}</strong> champ(s) modifié(s)
+                  </p>
+                </div>
+                
+                <!-- Bouton Enregistrer si champs éditables -->
+                <button class="btn btn-success" 
+                        *ngIf="hasEditableFields"
+                        
+                        (click)="saveForm()">
+                  <i class="bi bi-save me-2"></i>
+                  Enregistrer
+                  <span *ngIf="getModifiedCount() > 0" class="badge bg-light text-dark ms-2">
+                    {{ getModifiedCount() }}
+                  </span>
+                </button>
+                
+                <!-- Message explicatif pour la validation -->
+                <div class="alert alert-info mt-3" *ngIf="hasEditableFields && !isTokenValidated">
+                  <small>
+                    <i class="bi bi-info-circle me-1"></i>
+                    En validant, vos données seront envoyées au créateur du partage et votre accès sera clôturé.
+                  </small>
+                </div>
+                
+                <!-- Message pour token validé -->
+                <div class="alert alert-success mt-3" *ngIf="isTokenValidated">
+                  <small>
+                    <i class="bi bi-check-circle me-1"></i>
+                    Ce formulaire a été validé. Les données ont été envoyées au créateur du partage.
+                  </small>
+                </div>
+                
+                <!-- Bouton Télécharger HTML -->
+                <button class="btn btn-outline-secondary" 
+                        (click)="downloadFormAsHtml()">
+                  <i class="bi bi-download me-2"></i>
+                  Télécharger HTML
+                </button>
+                
+                <!-- Bouton Télécharger CSV -->
+                <button class="btn btn-outline-secondary" 
+                        (click)="downloadFormAsCsv()">
+                  <i class="bi bi-file-earmark-spreadsheet me-2"></i>
+                  Télécharger CSV
+                </button>
+                
+                <!-- Bouton Valider -->
+                <button class="btn btn-primary" 
+                        *ngIf="!isTokenValidated"
+                        (click)="validateForm()">
+                  <i class="bi bi-check-circle me-2"></i>
+                  Valider
+                </button>
+                
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Pied de page -->
+  <app-footer></app-footer>
+
+  <!-- Modal de confirmation pour validation par le propriétaire -->
+  <div class="modal fade show" [style.display]="showOwnerValidationModal ? 'block' : 'none'" [style.background]="'rgba(0,0,0,0.4)'" style="z-index: 1050; position: fixed; top: 0; left: 0; width: 100%; height: 100%;">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content" style="background: white; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="bi bi-exclamation-triangle me-2 text-warning"></i>
+            Validation par le propriétaire
+          </h5>
+          <button type="button" class="btn-close" (click)="cancelOwnerValidation()"></button>
+        </div>
+        <div class="modal-body">
+          <div class="alert alert-warning">
+            <i class="bi bi-info-circle me-2"></i>
+            <strong>Attention !</strong> Vous allez valider les données à la place du destinataire.
+          </div>
+          
+          <div class="mb-4">
+            <h6>Informations du partage :</h6>
+            <ul class="list-unstyled">
+              <li><strong>Destinataire :</strong> {{ formData?.recipientEmail }}</li>
+              <li><strong>Votre email :</strong> {{ authState.userEmail }}</li>
+              <li><strong>Partagé le :</strong> {{ formatDate(formData?.createdAt || '') }}</li>
+            </ul>
+          </div>
+          
+          <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>
+            <strong>Note :</strong> Cette action sera enregistrée avec la mention "validé par : {{ authState.userEmail }}" dans les informations de validation et le fichier HTML téléchargeable.
+          </div>
+          
+          <p class="mb-0">
+            <strong>Êtes-vous sûr de vouloir continuer ?</strong>
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="cancelOwnerValidation()" [disabled]="isOwnerValidating">
+            Annuler
+          </button>
+          <button type="button" class="btn btn-warning" (click)="confirmOwnerValidation()" [disabled]="isOwnerValidating">
+            <span *ngIf="isOwnerValidating" class="spinner-border spinner-border-sm me-2"></span>
+            <i *ngIf="!isOwnerValidating" class="bi bi-check-circle me-2"></i>
+            {{ isOwnerValidating ? 'Validation en cours...' : 'Confirmer la validation' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

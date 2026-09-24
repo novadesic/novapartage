@@ -1,0 +1,42 @@
+####
+# Dockerfile JVM simplifié pour le backend ddsshare
+# Basé sur UBI 9 minimal pour une image légère
+#
+# Build de l'application:
+# ./mvnw clean package -DskipTests
+#
+# Construction de l'image:
+# docker build -f src/main/docker/Dockerfile.jvm-simple -t ghcr.io/novadesic/novapartage-backend:latest .
+#
+# Exécution du conteneur:
+# docker run -i --rm -p 8080:8080 ghcr.io/novadesic/novapartage-backend:latest
+####
+
+FROM registry.access.redhat.com/ubi9/ubi-minimal:9.5
+
+# Installation de Java 17 et des dépendances minimales
+RUN microdnf update -y && \
+    microdnf install -y \
+    java-17-openjdk-headless \
+    ca-certificates \
+    && microdnf clean all
+
+# Configuration du répertoire de travail
+WORKDIR /work/
+
+# Configuration des permissions
+RUN chown 1001 /work \
+    && chmod "g+rwX" /work \
+    && chown 1001:root /work
+
+# Copie du JAR et des ressources
+COPY --chown=1001:root target/quarkus-app/ /work/quarkus-app/
+
+# Exposition du port
+EXPOSE 8080
+
+# Utilisateur non-root pour la sécurité
+USER 1001
+
+# Point d'entrée avec configuration pour écouter sur toutes les interfaces
+ENTRYPOINT ["java", "-Dquarkus.http.host=0.0.0.0", "-Dquarkus.http.port=8080", "-jar", "/work/quarkus-app/quarkus-run.jar"] 

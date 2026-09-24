@@ -1,0 +1,30 @@
+NovaPartage
+Partagez des données, pas vos fichiers.
+
+Accès à un partage de données
+
+---
+
+Bonjour,
+
+{{ownerEmail}} vous a donné accès à un partage de données via NovaPartage.
+
+Partage de données
+==================
+Nom du partage: {{formName}}
+Partagé par: {{ownerEmail}}
+Valide pendant: {{validityDays}} jour{{validityDaysPlural}}
+Expire le: {{expiresAtFormatted}}
+
+Accéder au partage :
+{{accessUrl}}
+
+⚠️ Important: Ce lien est personnel et confidentiel. Ne le partagez pas avec d'autres personnes.
+
+Si vous n'attendiez pas cet email ou si vous avez des questions, vous pouvez contacter directement {{ownerEmail}}.
+
+---
+Cet email a été envoyé automatiquement par NovaPartage
+Si vous n'avez pas demandé cet email, vous pouvez l'ignorer.
+
+https://novapartage.fr

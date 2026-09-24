@@ -1,0 +1,119 @@
+# Exemple de configuration des variables d'environnement pour DDSShare
+# Copiez ce fichier en config.env et modifiez selon vos besoins
+# Usage: source config.env && cd backend && ./start.sh
+
+# ===========================================
+# STOCKAGE DES FICHIERS
+# ===========================================
+
+# Répertoire de base pour le stockage des fichiers utilisateurs
+# Par défaut: /users_files
+export APP_FILE_STORAGE_BASE_PATH=/users_files
+
+# ===========================================
+# BASE DE DONNÉES MONGODB
+# ===========================================
+
+# Connexion MongoDB pour le développement (optionnel)
+# export QUARKUS_MONGODB_CONNECTION_STRING=mongodb://localhost:27017
+
+# Connexion MongoDB pour la production (avec authentification)
+# export QUARKUS_MONGODB_CONNECTION_STRING=mongodb://admin:admin123@mongodb:27017/ddsshare?authSource=admin
+
+# Base de données MongoDB
+# export QUARKUS_MONGODB_DATABASE=ddsshare
+
+# ===========================================
+# AUTHENTIFICATION PERSONNALISÉE
+# ===========================================
+
+# Le système utilise maintenant un service d'authentification personnalisé
+# basé sur la validation d'email et les tokens JWT
+# Configuration dans le service auth-service
+
+# ===========================================
+# CONFIGURATION RÉSEAU
+# ===========================================
+
+# Port du backend Quarkus
+# export QUARKUS_HTTP_PORT=8083
+
+# Interface d'écoute
+# export QUARKUS_HTTP_HOST=0.0.0.0
+
+# ===========================================
+# URL DE L'APPLICATION (pour les liens d'accès)
+# ===========================================
+
+# URL complète de l'application (priorité 1)
+# Exemple: https://ddsshare.example.com
+# export APP_BASE_URL=https://ddsshare.example.com
+
+# URL du frontend (priorité 2)
+# Exemple: https://ddsshare.example.com
+# export FRONTEND_URL=https://ddsshare.example.com
+
+# Nom de domaine de l'application (priorité 3)
+# Le protocole sera détecté automatiquement (HTTP pour localhost, HTTPS pour les autres)
+# Exemple: ddsshare.example.com
+# export APP_DOMAIN=ddsshare.example.com
+
+# ===========================================
+# EXEMPLES DE CONFIGURATION
+# ===========================================
+
+# Développement local
+# export APP_DOMAIN=localhost
+
+# Production avec domaine personnalisé
+# export APP_BASE_URL=https://ddsshare.monentreprise.com
+
+# Production avec sous-domaine
+# export APP_DOMAIN=ddsshare.monentreprise.com
+
+# ===========================================
+# DÉVELOPPEMENT
+# ===========================================
+
+# Profil Quarkus (dev par défaut)
+# export QUARKUS_PROFILE=dev
+
+# Niveau de logs
+# export QUARKUS_LOG_LEVEL=INFO
+
+# ===========================================
+# EXEMPLES DE CHEMINS PERSONNALISÉS
+# ===========================================
+
+# Stockage sur un disque externe
+# export APP_FILE_STORAGE_BASE_PATH=/mnt/external/ddsshare-files
+
+# Stockage dans le répertoire utilisateur
+# export APP_FILE_STORAGE_BASE_PATH=$HOME/Documents/ddsshare-files
+
+# Stockage en production
+# export APP_FILE_STORAGE_BASE_PATH=/opt/ddsshare/files
+
+# ===========================================
+# INSTRUCTIONS D'UTILISATION
+# ===========================================
+
+# 1. Copiez ce fichier:
+#    cp config.example config.env
+
+# 2. Modifiez config.env selon vos besoins
+
+# 3. Chargez la configuration:
+#    source config.env
+
+# 4. Configurez les répertoires:
+#    ./setup-files-directory.sh
+
+# 5. Démarrez le backend:
+#    cd backend && ./start.sh
+#
+# 6. Démarrez le frontend (autre terminal):
+#    cd frontend && ./start.sh
+#
+# 7. Testez la configuration:
+#    ./test-setup.sh 

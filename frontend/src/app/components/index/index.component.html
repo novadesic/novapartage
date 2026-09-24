@@ -1,0 +1,276 @@
+<div class="container-fluid vh-100 d-flex flex-column">
+ 
+
+  <!-- Contenu principal -->
+  <main class="flex-grow-1 d-flex align-items-center justify-content-center">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-9 col-xl-7">
+          <div class="card shadow-lg border-0 bg-light">
+            <div class="card-body p-5 text-center">
+              <!-- Icône principale -->
+              <div class="mb-2">
+                <img src="assets/logo.png" alt="NovaPartage Logo" style="height: 8rem; width: auto;">
+              </div>
+              
+              <!-- Titre et description -->
+              <h1 class="display-4 fw-bold text-dark mb-2">
+                NovaPartage
+              </h1>
+              <p class="lead text-primary mb-2">
+                Partagez des données, pas vos fichiers.
+              </p>
+
+              <!-- Zone de dépôt pour créer un partage sans connexion -->
+              <div class="mb-4">
+                <div
+                  class="drag-drop-zone border border-primary rounded bg-white mx-auto"
+                  [class.drag-over]="isDragOver"
+                  [class.uploading]="isUploading"
+                  [title]="'Taille maximale autorisée : ' + maxFileSizeLabel"
+                  (drop)="onFileDrop($event)"
+                  (dragover)="onDragOver($event)"
+                  (dragleave)="onDragLeave($event)"
+                  (click)="!isUploading && fileInput.click()">
+                  <div *ngIf="isUploading" class="text-center">
+                    <span class="spinner-border spinner-border-sm text-primary me-2" role="status" aria-hidden="true"></span>
+                    Import du fichier en cours…
+                  </div>
+                  <div *ngIf="!isUploading">
+                    <i class="bi bi-file-earmark-arrow-up text-primary d-block mb-2" style="font-size: 2.5rem;"></i>
+                    <span *ngIf="!selectedFileName">
+                      Déposez ici votre fichier Excel<br>
+                      <small class="text-muted">Créez un partage sans vous connecter</small>
+                    </span>
+                    <span *ngIf="selectedFileName">
+                      Fichier sélectionné : <strong>{{ selectedFileName }}</strong>
+                    </span>
+                  </div>
+                  <input #fileInput type="file" style="display: none;" (change)="onFileSelected($event)" accept=".xlsx,.xls">
+                </div>
+                <p class="text-muted small mt-2 mb-0">
+                  <i class="bi bi-info-circle me-1"></i>
+                  Formats acceptés : .xlsx, .xls — taille max. {{ maxFileSizeLabel }}
+                </p>
+                <div *ngIf="fileUploadError" class="alert alert-danger mt-3 mb-0 text-start">
+                  <i class="bi bi-exclamation-triangle me-2"></i>{{ fileUploadError }}
+                </div>
+              </div>
+
+              <!-- Accès Mes partages -->
+              <p class="text-muted small mb-2">Déjà utilisateur ? Accéder à…</p>
+              <div class="d-grid gap-3 d-md-flex justify-content-md-center">
+                <button
+                  type="button"
+                  class="btn btn-outline-primary btn-lg px-4"
+                  (click)="gererMesPartages()">
+                  <i class="bi bi-share-fill me-2"></i>
+                  Mes partages
+                </button>
+              </div>
+              
+             
+              
+                  <!-- Informations supplémentaires -->
+                  <div class="mt-3 pt-2 border-top">
+                    <div class="row text-center">
+                      <div class="col-lg-3 col-md-6 mb-2">
+                        <i class="bi bi-shield-check text-success" style="font-size: 2.5rem;"></i>
+                        <h5 class="mt-3">Sécurisé</h5>
+                        <p class="small text-muted">Partagez des données sans exposer vos fichiers Excel originaux</p>
+                      </div>
+                      <div class="col-lg-3 col-md-6 mb-2">
+                        <i class="bi bi-bullseye text-danger" style="font-size: 2.5rem;"></i>
+                        <h5 class="mt-3">Ciblé</h5>
+                        <p class="small text-muted">Contrôlez l'accès aux données par destinataire et par cellules</p>
+                      </div>
+                      <div class="col-lg-3 col-md-6 mb-2">
+                        <i class="bi bi-lightning text-warning" style="font-size: 2.5rem;"></i>
+                        <h5 class="mt-3">Rapide</h5>
+                        <p class="small text-muted">Créez les données à partager en quelques clics</p>
+                      </div>
+                      <div class="col-lg-3 col-md-6 mb-2">
+                        <i class="bi bi-people text-info" style="font-size: 2.5rem;"></i>
+                        <h5 class="mt-3">Collaboratif</h5>
+                        <p class="small text-muted">Mettez à jour et enrichissez vos fichiers Excel originaux avec votre équipe ou vos partenaires</p>
+                      </div>
+                    </div>
+                  </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+<!-- Pied de page -->
+<app-footer></app-footer>
+
+<!-- Modal de connexion -->
+<div class="modal fade" [class.show]="showLoginModal" [style.display]="showLoginModal ? 'block' : 'none'" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="loginModalLabel">
+          <i class="bi bi-box-arrow-in-right me-2"></i>
+          Connexion à NovaPartage
+        </h5>
+        <button type="button" class="btn-close" (click)="closeLoginModal()" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-center text-primary mb-3 fw-bold">
+          Connectez-vous pour accéder à vos partages
+        </p>
+        <!-- Message d'information pour les liens expirés ou session expirée -->
+        <div *ngIf="isExpiredLink" class="alert alert-warning mb-3">
+          <i class="bi bi-exclamation-triangle me-2"></i>
+          <strong *ngIf="isSessionExpired">Session expirée</strong>
+          <strong *ngIf="!isSessionExpired">Lien de connexion expiré</strong>
+          <p class="mb-0 mt-1" *ngIf="isSessionExpired">
+            Votre session a expiré. Saisissez votre adresse email ci-dessous pour recevoir un nouveau lien de connexion.
+          </p>
+          <p class="mb-0 mt-1" *ngIf="!isSessionExpired">
+            Votre lien de connexion a expiré. Saisissez votre adresse email ci-dessous pour recevoir un nouveau lien.
+          </p>
+        </div>
+        
+        <div *ngIf="!emailSent && loginMethod !== 'password'">
+          <p class="text-muted mb-3">
+            Saisissez votre adresse email puis choisissez votre mode de connexion.
+          </p>
+          
+          <!-- Message d'erreur dans le modal -->
+          <div *ngIf="uploadError" class="alert alert-warning mb-3">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            {{ uploadError }}
+          </div>
+          
+          <form (ngSubmit)="onEmailStepSubmit($event)">
+            <div class="mb-3">
+              <label for="email" class="form-label">Adresse email</label>
+              <input 
+                type="email" 
+                class="form-control" 
+                id="email" 
+                [(ngModel)]="email" 
+                name="email"
+                placeholder="ex: utilisateur@exemple.com"
+                required
+                [disabled]="isLoading || isLoggingInWithPassword">
+            </div>
+
+            <div class="mb-3">
+              <div class="form-check">
+                <input 
+                  class="form-check-input" 
+                  type="checkbox" 
+                  id="acceptTermsLogin" 
+                  [(ngModel)]="acceptTerms"
+                  name="acceptTerms"
+                  required>
+                <label class="form-check-label" for="acceptTermsLogin">
+                  J'accepte les <a href="/conditions-utilisation" target="_blank">conditions d'utilisation</a> 
+                  et la <a href="/politique-confidentialite" target="_blank">politique de confidentialité</a>
+                </label>
+              </div>
+            </div>
+            
+            <p class="text-muted small mb-2">Choisissez votre mode de connexion :</p>
+            <div class="d-grid gap-2">
+              <button 
+                type="button" 
+                class="btn btn-outline-primary"
+                (click)="choosePasswordLogin()"
+                [disabled]="isLoading || isLoggingInWithPassword || !email || !acceptTerms">
+                <i class="bi bi-key me-2"></i>
+                J'ai déjà un mot de passe
+              </button>
+              <button 
+                type="button" 
+                class="btn btn-primary"
+                (click)="loginWithEmail()"
+                [disabled]="isLoading || isLoggingInWithPassword || !email || !acceptTerms">
+                <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                <i *ngIf="!isLoading" class="bi bi-envelope me-2"></i>
+                {{ isLoading ? 'Envoi en cours...' : 'Recevoir un lien de connexion' }}
+              </button>
+            </div>
+          </form>
+        </div>
+        
+        <!-- Mode mot de passe -->
+        <div *ngIf="loginMethod === 'password' && !emailSent" class="mb-4">
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="text" class="form-control" [value]="email" readonly>
+          </div>
+          <form (ngSubmit)="loginWithPassword()">
+            <div class="mb-3">
+              <label for="indexPassword" class="form-label">Mot de passe</label>
+              <div class="input-group">
+                <input 
+                  [type]="showIndexPassword ? 'text' : 'password'" 
+                  class="form-control" 
+                  id="indexPassword" 
+                  [(ngModel)]="userPassword" 
+                  name="userPassword"
+                  placeholder="Votre mot de passe"
+                  [disabled]="isLoggingInWithPassword">
+                <button class="btn btn-outline-secondary" type="button" (click)="showIndexPassword = !showIndexPassword" [disabled]="isLoggingInWithPassword" tabindex="-1">
+                  <i class="bi" [ngClass]="showIndexPassword ? 'bi-eye-slash' : 'bi-eye'"></i>
+                </button>
+              </div>
+            </div>
+            <div class="alert alert-danger" *ngIf="loginPasswordError">
+              <i class="bi bi-exclamation-triangle me-2"></i>{{ loginPasswordError }}
+            </div>
+            <div class="d-grid gap-2">
+              <button 
+                type="submit" 
+                class="btn btn-primary"
+                [disabled]="isLoggingInWithPassword || !userPassword">
+                <span *ngIf="isLoggingInWithPassword" class="spinner-border spinner-border-sm me-2"></span>
+                <i *ngIf="!isLoggingInWithPassword" class="bi bi-box-arrow-in-right me-2"></i>
+                {{ isLoggingInWithPassword ? 'Connexion...' : 'Se connecter' }}
+              </button>
+              <button 
+                type="button" 
+                class="btn btn-outline-secondary"
+                (click)="backToLoginChoice()"
+                [disabled]="isLoggingInWithPassword">
+                <i class="bi bi-arrow-left me-2"></i>Retour
+              </button>
+            </div>
+          </form>
+        </div>
+        
+        <div *ngIf="emailSent" class="text-center">
+          <div class="mb-3">
+            <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
+          </div>
+          <h5 class="text-success mb-3">Email envoyé !</h5>
+          <p class="text-muted mb-3">
+            Un lien de connexion temporaire a été envoyé à <strong>{{ email }}</strong>
+          </p>
+          <p class="small text-muted">
+            <i class="bi bi-info-circle me-1"></i>
+            Vérifiez votre boîte de réception et cliquez sur le lien pour vous connecter.
+          </p>
+          <div class="d-grid gap-2">
+            <button 
+              type="button" 
+              class="btn btn-outline-primary"
+              (click)="closeLoginModal()">
+              <i class="bi bi-x-circle me-2"></i>
+              Fermer
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Backdrop du modal -->
+<div *ngIf="showLoginModal" class="modal-backdrop fade show" (click)="closeLoginModal()"></div>
+</div> 

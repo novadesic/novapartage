@@ -1,0 +1,357 @@
+<div class="vh-100 d-flex flex-column">
+   <!-- Navbar globale fixe -->
+   <app-navbar pageTitle="Détails du partage"></app-navbar>
+
+  <!-- Contenu principal -->
+  <main class="flex-grow-1">
+    <div class="container-fluid py-4">
+      
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Chargement...</span>
+    </div>
+    <p class="mt-3 text-muted">Chargement des détails du partage...</p>
+  </div>
+
+  <!-- Erreur -->
+  <div *ngIf="error" class="alert alert-danger" role="alert">
+    <i class="bi bi-exclamation-triangle me-2"></i>
+    {{ error }}
+    <button class="btn btn-outline-danger btn-sm ms-3" (click)="loadShareDetails()">
+      <i class="bi bi-arrow-clockwise me-1"></i>
+      Réessayer
+    </button>
+  </div>
+
+  <!-- Contenu principal -->
+  <div *ngIf="!isLoading && !error && share" class="row">
+    
+    <!-- Informations principales -->
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">
+            <i class="bi bi-gear me-2"></i>
+            Destinataires ({{ getRecipientsCount() }})
+          </h5>
+        </div>
+        <div class="card-body">
+          
+         
+
+          <!-- Destinataires -->
+          <div class="mb-4" *ngIf="share.recipients && share.recipients.length > 0">
+            
+            <div class="row">
+              <div *ngFor="let recipient of share.recipients" class="col-md-6 mb-3">
+                <div class="card border-0 shadow-sm recipient-card">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                      <i class="bi bi-person-circle me-2 text-primary"></i>
+                      <div class="flex-grow-1">
+                        <div class="fw-bold">{{ recipient.email || recipient.username }}</div>
+                        <small class="text-muted" *ngIf="recipient.firstName || recipient.lastName">
+                          {{ recipient.firstName }} {{ recipient.lastName }}
+                        </small>
+                      </div>
+                    </div>
+                    
+                    <!-- Actions -->
+                    <div class="d-flex gap-2 mb-3">
+                      
+                      
+                      <div class="dropdown" *ngIf="!isRestricted && !hasValidatedTokenForRecipient(recipient.email) && !hasActiveTokenForRecipient(recipient.email)">
+                        <button class="btn btn-primary btn-sm dropdown-toggle" 
+                                data-bs-toggle="dropdown">
+                          <i class="bi bi-gear me-1"></i>
+                          Générer un nouveau lien
+                        </button>
+                        <ul class="dropdown-menu">
+                          <li *ngFor="let option of validityOptions">
+                            <a class="dropdown-item" 
+                               (click)="generateAccessLink(recipient, option.value); $event.preventDefault()">
+                              <i class="bi bi-arrow-clockwise me-2"></i>
+                              expirant dans {{ option.label }}
+                            </a>
+                          </li>
+                        </ul>
+                      </div>
+                      
+                      <button class="btn btn-outline-secondary btn-sm" 
+                              *ngIf="!isRestricted && (hasActiveTokenForRecipient(recipient.email) || hasValidatedTokenForRecipient(recipient.email))"
+                              (click)="resendAccessEmail(recipient)"
+                              title="Renvoyer l'email d'accès">
+                        <i class="bi bi-envelope me-1"></i>
+                        Renvoyer l'email
+                      </button>
+                      
+                      <div *ngIf="hasValidatedTokenForRecipient(recipient.email)" class="alert alert-info">
+                        <small>
+                          <i class="bi bi-check-circle me-1"></i>
+                          Ce destinataire a validé ses données.
+                        </small>
+                      </div>
+                    </div>
+                    
+                    <!-- Tokens d'accès -->
+                    <ng-container *ngIf="getTokensForRecipient(recipient.email) as recipientTokens">
+                      <div *ngIf="recipientTokens.length > 0">
+                        <h6 class="text-muted mb-2">Liens d'accès actifs</h6>
+                        <div class="list-group list-group-flush">
+                          <div *ngFor="let token of recipientTokens" 
+                               class="list-group-item p-2 border-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                            <div class="flex-grow-1">
+                              <div class="mb-2" *ngIf="token.pageTitle">
+                                <div class="text-muted small mb-1">
+                                  <i class="bi bi-file-earmark-text me-1"></i>
+                                  Nom du partage
+                                </div>
+                                <div class="fw-bold text-primary" style="font-size: 1.1em;">
+                                  {{ token.pageTitle }}
+                                </div>
+                              </div>
+                              <div class="d-flex align-items-center">
+                                <span class="badge me-2" 
+                                      [ngClass]="{
+                                        'bg-success': token.status === 'ACTIVE',
+                                        'bg-warning': token.status === 'EXPIRED',
+                                        'bg-danger': token.status === 'REVOKED',
+                                        'bg-info': token.status === 'VALIDATED'
+                                      }">
+                                  {{ getStatusLabel(token.status) }}
+                                </span>
+                                <small class="text-muted" *ngIf="token.status === 'ACTIVE'">
+                                  {{ formatExpirationDate(token.expiresAt) }}
+                                </small>
+                              </div>
+                              <div class="mt-1">
+                                <small class="text-muted">
+                                  Ouvert {{ token.usageCount }} fois
+                                  <span *ngIf="token.lastUsedAt"> • Dernier accès: {{ formatDate(token.lastUsedAt) }}</span>
+                                  <span *ngIf="token.validatedAt"> • Validé le: {{ formatDate(token.validatedAt) }}</span>
+                                </small>
+                              </div>
+                            </div>
+                            <div class="btn-group btn-group-sm">
+                              <a *ngIf="token.status === 'ACTIVE' || token.status === 'VALIDATED'" 
+                                 class="btn btn-outline-info btn-sm" 
+                                 [href]="token.accessUrl"
+                                 target="_blank"
+                                 [title]="token.status === 'VALIDATED' ? 'Voir le formulaire validé' : 'Prévisualiser le formulaire'">
+                                <i class="bi bi-eye"></i>
+                              </a>
+                              <button *ngIf="token.status !== 'ACTIVE' && token.status !== 'VALIDATED'" 
+                                      class="btn btn-outline-info btn-sm" 
+                                      disabled
+                                      title="Lien expiré ou révoqué">
+                                <i class="bi bi-eye"></i>
+                              </button>
+                              <button class="btn btn-outline-primary btn-sm" 
+                                      (click)="copyToClipboard(token.accessUrl)"
+                                      
+                                      [title]="token.status === 'ACTIVE' ? 'Copier le lien d\'accès' : 'Le lien doit être actif pour être copié'"
+                                      data-bs-toggle="tooltip"
+                                      data-bs-placement="top">
+                                <i class="bi bi-clipboard"></i>
+                              </button>
+                              <button class="btn btn-outline-success btn-sm" 
+                                      *ngIf="share.downloadUrl"
+                                      (click)="openDownloadUrl(share.downloadUrl)"
+                                      [disabled]="isDownloading"
+                                      title="Télécharger le fichier">
+                                <i class="bi bi-download"></i>
+                              </button>
+                              <button class="btn btn-outline-danger btn-sm" 
+                                      *ngIf="!isRestricted"
+                                      (click)="revokeToken(token.id)"
+                                      [disabled]="token.status !== 'ACTIVE'">
+                                <i class="bi bi-x-circle"></i>
+                              </button>
+                            </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </ng-container>
+                    
+                    <!-- Loading -->
+                    <div *ngIf="regeneratingLinks[recipient.email]" class="mt-2">
+                      <small class="text-muted">
+                        <i class="bi bi-arrow-clockwise me-1"></i>
+                        Génération en cours...
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Liens de téléchargement -->
+          <div class="mb-4" *ngIf="share.downloadUrl">
+            <h6 class="text-muted mb-3">Lien de téléchargement</h6>
+            <div class="input-group">
+              <input type="text" class="form-control" [value]="share.downloadUrl" readonly>
+              <button class="btn btn-outline-primary" type="button" 
+                      (click)="copyToClipboard(share.downloadUrl)"
+                      title="Copier le lien de partage"
+                      data-bs-toggle="tooltip"
+                      data-bs-placement="top">
+                <i class="bi bi-clipboard me-1"></i>
+                Copier
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">
+            <i class="bi bi-gear me-2"></i>
+            Informations et Actions
+          </h5>
+        </div>
+        <div class="card-body">
+           <!-- Informations du fichier -->
+           
+            <div class="col-12">
+              <h6 class="text-muted mb-3">Informations du fichier</h6>
+              <div class="mb-2 d-flex align-items-center">
+                <strong>Nom original : </strong> 
+                <span class="ms-2">{{ share.originalFileName || share.fileName }}</span>
+                <button class="btn btn-outline-success btn-sm ms-2" 
+                        (click)="downloadShareFile()"
+                        [disabled]="isDownloading"
+                        title="Télécharger le fichier original">
+                  <i class="bi bi-download"></i>
+                </button>
+              </div>
+              <div class="mb-2" *ngIf="share.fileSize">
+                <strong>Taille : </strong> {{ getFileSize(share.fileSize) }}
+              </div>
+              <div class="mb-2">
+                <strong>Type : </strong> 
+                <span class="badge bg-success">Excel</span>
+              </div>
+            </div>
+            
+            <div class="d-grid gap-2">
+              <button class="btn btn-primary" 
+                      (click)="downloadShareFile()"
+                      [disabled]="isDownloading">
+                <i class="bi bi-download me-2"></i>
+                Télécharger le fichier original
+              </button>
+              
+              
+              
+              <button class="btn btn-success" 
+                      *ngIf="hasValidatedAccess()"
+                      (click)="downloadShareFileWithValidatedData()"
+                      [disabled]="isDownloading">
+                <i class="bi bi-file-earmark-check me-2"></i>
+                Télécharger avec données validées
+              </button>
+            </div>
+            <div class="col-12">
+              <h6 class="text-muted mb-3 mt-3">Informations du partage</h6>
+              <div class="mb-2">
+                <strong>Statut : </strong> 
+                <span class="badge" [ngClass]="{
+                  'bg-success': share.status === 'ACTIVE',
+                  'bg-warning': share.status === 'PENDING',
+                  'bg-danger': share.status === 'EXPIRED'
+                }">{{ share.status || 'ACTIVE' }}</span>
+              </div>
+              <div class="mb-2">
+                <strong>Créé le : </strong> {{ formatDate(share.createdAt) }}
+              </div>
+              <div class="mb-2" *ngIf="share.updatedAt">
+                <strong>Modifié le : </strong> {{ formatDate(share.updatedAt) }}
+              </div>
+            </div>
+              
+
+          <!-- Description -->
+          <div class="mb-4" *ngIf="share.description">
+            <h6 class="text-muted mb-2">Description</h6>
+            <p class="mb-0">{{ share.description }}</p>
+          </div>
+          <div class="d-grid gap-2">
+            
+            
+            <button class="btn btn-secondary" 
+                    *ngIf="share.ownerUsername === authService.getUsername() && share.status === 'ACTIVE' && !isRestricted"
+                    (click)="onRedefineShare()"
+                    title="Modifier la configuration du partage (destinataires, permissions, etc.)">
+              <i class="bi bi-pencil-square me-2"></i>
+              Redéfinir le partage
+            </button>
+            
+            
+            <button class="btn btn-outline-secondary" (click)="onBackToList()">
+              <i class="bi bi-arrow-left me-2"></i>
+              Retour à la liste
+            </button>
+            <button class="btn btn-outline-danger" *ngIf="!isRestricted" (click)="onDeleteShare()">
+              <i class="bi bi-trash me-2"></i>
+              Supprimer le partage
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+      </div>
+
+      <!-- Partage non trouvé -->
+      <div *ngIf="!isLoading && !error && !share" class="text-center py-5">
+        <i class="bi bi-exclamation-circle text-muted" style="font-size: 4rem;"></i>
+        <h4 class="mt-3 text-muted">Partage non trouvé</h4>
+        <p class="text-muted">Le partage que vous recherchez n'existe pas ou a été supprimé.</p>
+        <button class="btn btn-primary" (click)="onBackToList()">
+          <i class="bi bi-arrow-left me-2"></i>
+          Retour à la liste
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Pied de page -->
+  <app-footer></app-footer>
+</div>
+
+<!-- Backdrop du modal de téléchargement -->
+<div *ngIf="isDownloading" class="modal-backdrop fade show" style="z-index: 1040;"></div>
+
+<!-- Modal de téléchargement -->
+<div class="modal fade" 
+     [class.show]="isDownloading" 
+     [style.display]="isDownloading ? 'block' : 'none'" 
+     tabindex="-1" 
+     role="dialog"
+     aria-labelledby="downloadModalLabel"
+     aria-hidden="true"
+     style="z-index: 1050;"
+     data-bs-backdrop="static"
+     data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body text-center py-5">
+        <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+          <span class="visually-hidden">Téléchargement en cours...</span>
+        </div>
+        <h5 class="mb-2">Téléchargement en cours...</h5>
+        <p class="text-muted mb-0">Veuillez patienter pendant le téléchargement du fichier.</p>
+      </div>
+    </div>
+  </div>
+</div> 

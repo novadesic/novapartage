@@ -1,0 +1,251 @@
+<div class="form-configurator">
+  <!-- Spinner de chargement -->
+  <div *ngIf="isSimulating" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Chargement...</span>
+    </div>
+    <p class="mt-3 text-muted">Chargement des données...</p>
+  </div>
+
+  <!-- Contenu principal (masqué pendant le chargement) -->
+  <div *ngIf="!isSimulating">
+    <div class="d-flex align-items-center mb-2">
+      <!-- Message informatif si aucune cellule édition sélectionnée -->
+      <div class="flex-grow-1 me-3" *ngIf="getEditableCellsCount() === 0">
+        <small class="text-info">
+          <i class="bi bi-info-circle me-1"></i>
+          Attribution de droits de modification optionnelle - Cette étape est facultative
+        </small>
+      </div>
+      
+      <div class="d-flex align-items-center gap-3 ms-auto">
+        <button type="button" class="btn btn-outline-secondary btn-sm" (click)="onResetColumnLabels()" title="Réinitialiser les en-têtes depuis les sélections">
+          <i class="bi bi-magic me-1"></i>
+          Recharger les en-têtes
+        </button>
+        
+        <!-- Sélecteur de type de sélection -->
+        <div class="d-flex align-items-center gap-2">
+          <label class="form-label mb-0" style="font-size: 0.875rem; font-weight: 500;">Type de sélection :</label>
+          <div class="dropdown">
+            <button class="btn btn-outline-warning btn-sm dropdown-toggle d-flex align-items-center gap-2" 
+                    type="button" 
+                    id="selectionTypeDropdown" 
+                    data-bs-toggle="dropdown" 
+                    aria-expanded="false"
+                    style="min-width: 150px; justify-content: space-between;">
+              <span class="d-flex align-items-center gap-2">
+                <i [ngClass]="{
+                  'bi bi-square': selectionType === 'cell',
+                  'bi bi-arrow-right': selectionType === 'row',
+                  'bi bi-arrow-down': selectionType === 'column'
+                }"></i>
+                <span>{{ getSelectionTypeLabel() }}</span>
+              </span>
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="selectionTypeDropdown">
+              <li>
+                <a class="dropdown-item d-flex align-items-center gap-2" 
+                   [class.active]="selectionType === 'cell'"
+                   (click)="setSelectionType('cell')">
+                  <i class="bi bi-square"></i>
+                  <span>Par cellule</span>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center gap-2" 
+                   [class.active]="selectionType === 'row'"
+                   (click)="setSelectionType('row')">
+                  <i class="bi bi-arrow-right"></i>
+                  <span>Par ligne</span>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center gap-2" 
+                   [class.active]="selectionType === 'column'"
+                   (click)="setSelectionType('column')">
+                  <i class="bi bi-arrow-down"></i>
+                  <span>Par colonne</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        
+        <!-- Mode d'action -->
+        <div class="d-flex align-items-center gap-2">
+          <label class="form-label mb-0" style="font-size: 0.875rem; font-weight: 500;">Mode d'action :</label>
+          <div class="dropdown">
+            <button class="btn btn-outline-warning btn-sm dropdown-toggle d-flex align-items-center gap-2" 
+                    type="button" 
+                    id="selectionModeDropdown" 
+                    data-bs-toggle="dropdown" 
+                    aria-expanded="false"
+                    style="min-width: 180px; justify-content: space-between;">
+              <span class="d-flex align-items-center gap-2">
+                <i [ngClass]="{
+                  'bi bi-arrow-left-right': selectionMode === 'auto',
+                  'bi bi-plus-circle': selectionMode === 'select-only',
+                  'bi bi-dash-circle': selectionMode === 'deselect-only'
+                }"></i>
+                <span>{{ getSelectionModeLabel() }}</span>
+              </span>
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="selectionModeDropdown">
+              <li>
+                <a class="dropdown-item d-flex align-items-center gap-2" 
+                   [class.active]="selectionMode === 'auto'"
+                   (click)="setSelectionMode('auto')">
+                  <i class="bi bi-arrow-left-right"></i>
+                  <span>Inverser la sélection</span>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center gap-2" 
+                   [class.active]="selectionMode === 'select-only'"
+                   (click)="setSelectionMode('select-only')">
+                  <i class="bi bi-plus-circle"></i>
+                  <span>Sélectionner uniquement</span>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center gap-2" 
+                   [class.active]="selectionMode === 'deselect-only'"
+                   (click)="setSelectionMode('deselect-only')">
+                  <i class="bi bi-dash-circle"></i>
+                  <span>Désélectionner uniquement</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Indicateur : cellules formules dans la sélection éditables -->
+    <div class="alert alert-warning py-2 px-3 mb-2 d-flex align-items-center gap-2" 
+         *ngIf="formulaCellsCountInEditableSelection > 0 && selectedData.length > 0"
+         role="alert">
+      <i class="bi bi-exclamation-triangle-fill flex-shrink-0"
+         [attr.title]="formulaCellsCountInEditableSelection === 1 ? '1 cellule calculée rendue éditable' : formulaCellsCountInEditableSelection + ' cellules calculées rendues éditables'"></i>
+      <span class="small">
+        <ng-container *ngIf="formulaCellsCountInEditableSelection === 1">
+          1 cellule calculée rendue éditable
+        </ng-container>
+        <ng-container *ngIf="formulaCellsCountInEditableSelection > 1">
+          {{ formulaCellsCountInEditableSelection }} cellules calculées rendues éditables
+        </ng-container>
+      </span>
+    </div>
+    
+    <div class="alert alert-info mb-3" *ngIf="selectedData.length === 0">
+      <i class="bi bi-info-circle me-2"></i>
+      Aucune cellule sélectionnée. Veuillez sélectionner des cellules dans l'étape précédente.
+    </div>
+  
+  <div class="virtual-scroll-container" 
+       style="height: 500px; overflow-y: auto; position: relative;" 
+       *ngIf="selectedData.length > 0"
+       (scroll)="onScroll($event)"
+       (mouseleave)="onTableMouseLeave()">
+    
+    <!-- En-tête fixe -->
+    <div class="sticky-header-container" style="position: sticky; top: 0; z-index: 10; background: white;">
+      <table class="table table-bordered table-sm mb-0" [style.width.px]="getTotalTableWidth()">
+        <thead>
+          <tr>
+            <th class="sticky-cell" style="width: 70px; background: #f8f9fa; position: relative; text-align: right;vertical-align: bottom;">
+              <!-- Mini-bouton pour sélectionner toutes les cellules -->
+              <button type="button" class="btn btn-sm btn-outline-primary mini-select-btn" 
+                      (click)="selectAllCells()" 
+                      [title]="getSelectAllTooltip()">
+                <i class="bi bi-grid-3x3-gap"></i>
+              </button>
+            </th>
+            <th *ngFor="let column of selectedColumns; let colIndex = index" 
+                class="sticky-cell column-header-cell" 
+                style="text-align: center; background: #f8f9fa; position: relative;"
+                [style.width.px]="getColumnWidth(column)"
+                >
+              <div class="d-flex flex-column align-items-center">
+                <!-- Mode édition -->
+                <input *ngIf="editingColumnKey === column"
+                       type="text"
+                       class="form-control form-control-sm text-center mb-1"
+                       [(ngModel)]="editingColumnValue"
+                       (blur)="stopEditingColumn(true)"
+                       (keydown)="onColumnLabelEditKeydown($event, column)"
+                       [style.width.px]="getColumnWidth(column) - 20"
+                       style="display: inline-block;"
+                       #editInput
+                       (click)="$event.stopPropagation()"
+                       (mousedown)="$event.stopPropagation()"
+                       (focus)="editInput.select()" />
+                <!-- Mode affichage -->
+                <span *ngIf="editingColumnKey !== column"
+                      class="column-label-text mb-1 d-flex align-items-center justify-content-center gap-1"
+                      (click)="startEditingColumn(column, $event)"
+                      [title]="'Cliquer pour éditer'"
+                      [style.width.px]="getColumnWidth(column) - 20">
+                  <span class="column-label-text-content">{{ getColumnLabel(column) }}</span>
+                  <i class="bi bi-pencil-square column-edit-icon"></i>
+                </span>
+                <!-- Mini-bouton pour sélectionner la colonne -->
+                <button type="button" class="btn btn-sm btn-outline-info mini-select-btn" 
+                        (click)="onColumnHeaderMouseDown(colIndex, $event)"
+                        [title]="getSelectColumnTooltip(colIndex)">
+                  <i class="bi bi-arrow-down"></i>
+                </button>
+              </div>
+            </th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+
+    <!-- Conteneur virtuel -->
+    <div [style.height.px]="totalHeight" style="position: relative;">
+      <div [style.transform]="'translateY(' + offsetY + 'px)'" style="position: absolute; top: 0; left: 0; right: 0;">
+        <table class="table table-bordered table-sm mb-0" [style.width.px]="getTotalTableWidth()">
+          <tbody>
+            <tr *ngFor="let row of virtualSelectedData; let rowIndex = index" 
+                [style.height.px]="itemHeight">
+              <td style="text-align: right; background: #f8f9fa; font-weight: bold; position: relative; width: 70px;"
+                  (mousedown)="onRowNumberCellMouseDown(startIndex + rowIndex, $event)"
+                  class="row-number-cell"
+                  [class.cursor-pointer]="true">
+                <div class="d-flex align-items-center justify-content-between">
+                  <span>{{ startIndex + rowIndex + 1 }}</span>
+                  <!-- Mini-bouton pour sélectionner la ligne -->
+                  <!---<button type="button" class="btn btn-sm btn-outline-success mini-select-btn" 
+                          (click)="selectRow(startIndex + rowIndex)" 
+                          [title]="getSelectRowTooltip(startIndex + rowIndex)">
+                    <i class="bi bi-arrow-right"></i>
+                  </button>-->
+                </div>
+              </td>
+              <td *ngFor="let column of selectedColumns; let colIndex = index"
+                  class="table-sheet-cell"
+                  [ngClass]="{'table-warning': isCellEditable(startIndex + rowIndex, colIndex)}"
+                  [class.formula-cell]="isFormulaCell(startIndex + rowIndex, column)"
+                  [style.width.px]="getColumnWidth(column)"
+                  (mousedown)="onCellMouseDown(startIndex + rowIndex, colIndex, $event)"
+                  (mouseover)="onCellMouseOver(startIndex + rowIndex, colIndex, $event)"
+                  (mouseup)="onCellMouseUp(startIndex + rowIndex, colIndex, $event)"
+                  style="position: relative;">
+                <span class="cell-content-with-indicator">
+                  <i *ngIf="isFormulaCell(startIndex + rowIndex, column)" class="bi bi-calculator formula-indicator" title="Valeur calculée"></i>
+                  {{ row[column] || '' }}
+                  <i *ngIf="isCellEditable(startIndex + rowIndex, colIndex)" 
+                     class="bi bi-pencil edit-icon" 
+                     title="Cellule éditable"></i>
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  </div>
+</div> 
